@@ -1,3 +1,4 @@
+"""Things related to the global context"""
 from psycopg2.extensions import cursor, connection
 
 class CtxError(StandardError):
@@ -42,3 +43,28 @@ def get_cursor(arg = None):
             return cur
         else:
             raise CtxError, 'No context available to create a cursor'
+
+def set_context(arg):
+    """Set a global context using a connection or cursor"""
+    global ctx
+    
+    if isinstance(arg, connection):
+        ctx.connection = arg
+    elif isinstance(arg, cursor):
+        ctx.connection = arg.connection
+        ctx.cursor = arg
+    else:
+        raise (
+            TypeError,
+            'Context must be a connection or a cursor, not {0}'.format(
+                type(arg)
+            )
+        )
+        
+def del_context():
+    """Clear the global context"""
+    global ctx
+    
+    ctx.connection = None
+    ctx.cursor = None
+
