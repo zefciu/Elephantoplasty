@@ -1,5 +1,6 @@
-# vim set fileencoding = utf-8
+# vim set fileencoding=utf-8
 from setuptools import setup
+from platform import platform
 
 setup(
       name = 'Elephantoplasty',
