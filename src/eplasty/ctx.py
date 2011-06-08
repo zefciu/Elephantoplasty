@@ -1,12 +1,14 @@
 """Things related to the global context"""
 from psycopg2.extensions import cursor, connection
+from eplasty.session import Session
+import psycopg2
 
 class CtxError(StandardError):
     """Exception raised on problems with context"""
     
 class Ctx(object):
     """This class will have one global instance - the default context"""
-    __slots__ = ['connection', 'cursor']
+    __slots__ = ['connection', 'cursor', 'session']
     
     def __init__ (self, connection = None, cursor = None):
         self.connection = connection
@@ -14,6 +16,27 @@ class Ctx(object):
         
 ctx = Ctx()
 
+def connect(*args, **kwargs):
+    """
+Passes all arguments to psycopg2 ``connect`` and creates a connection in global
+context.
+    """
+    global ctx
+    del_context()
+    ctx.connection = psycopg2.connect(*args, **kwargs)
+
+def get_connection(arg = None):
+    """
+Get a connection. Will return the argument or try to find connection in context
+    """
+    global ctx
+    if arg:
+        return arg
+    elif ctx.connection:
+        return ctx.connection
+    else:
+        raise CtxError, 'No connection passed and no in global context'
+    
 def get_cursor(arg = None):
     """Get a cursor. Will try do create it in the following way:
     * If a cursor is provided as argument - returns it
@@ -68,3 +91,13 @@ def del_context():
     ctx.connection = None
     ctx.cursor = None
 
+def start_session():
+    """Start the session in global context"""
+    global ctx
+    ctx.session = Session(get_connection())
+    
+def is_global_session():
+    """Check if global session exists and return it or false""" 
+    global ctx
+    return ctx.session or False
+    

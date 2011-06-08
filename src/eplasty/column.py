@@ -1,11 +1,21 @@
+from psycopg2.extensions import adapt
+
 class Column(object):
     """Base class for all columns"""
     __slots__ = ['name', 'pqtype', 'length', 'attrs']
     
-    def __init__(self, name, length = None, attrs = None):
+    def __init__(self, name, length = None, null= True, default = False):
         self.name = name
         self.length = length
-        self.attrs = attrs or []
+        self.null = null
+        self.default = default
+        
+        self.attrs = []
+        
+        if not null:
+            self.attrs.append('NOT NULL')
+        if default is not False:
+            self.attrs.append('DEFAULT {0}'.format(adapt(default).getquoted()))
     
     def check_compatibility(self, v):
         """Checks if python variable is compatible with this column."""
