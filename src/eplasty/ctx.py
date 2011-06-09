@@ -10,9 +10,10 @@ class Ctx(object):
     """This class will have one global instance - the default context"""
     __slots__ = ['connection', 'cursor', 'session']
     
-    def __init__ (self, connection = None, cursor = None):
+    def __init__ (self, connection = None, cursor = None, session = None):
         self.connection = connection
         self.cursor = cursor
+        self.session = session
         
 ctx = Ctx()
 
@@ -101,3 +102,12 @@ def is_global_session():
     global ctx
     return ctx.session or False
     
+def get_session(s):
+    """Return its argument or global session. If neither is present, raise
+    CtxError"""
+    if s:
+        return s
+    s = is_global_session()
+    if s:
+        return s
+    raise CtxError, 'Cannot find a session'

@@ -17,6 +17,13 @@ class Test(unittest.TestCase):
             
         self.TestTable = TestTable
         self.connection = get_connection()
+        self.cursor = self.connection.cursor()
+        try:
+            self.cursor.execute('DROP TABLE testing;')
+        except:
+            pass
+        
+        self.connection.commit()
         
     def tearDown(self):
         cur = self.connection.cursor()

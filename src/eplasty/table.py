@@ -1,5 +1,15 @@
-from eplasty.ctx import get_cursor
+from eplasty.ctx import get_cursor, get_session
 from eplasty.column import BigSerial
+from eplasty import conditions as cond
+
+class SearchError(Exception):
+    """Any problems with searches"""
+
+class NotFound(SearchError):
+    """No row found when one was expected"""
+
+class TooManyFound(SearchError):
+    """Too many rows found"""
 
 class Table(object):
     """Parent class for all table classes"""
@@ -59,6 +69,42 @@ Flush this object to database using given cursor
         cursor.execute(command)
         cursor.connection.commit()
         
+    @classmethod
+    def get(cls, id = None, session = None, *args, **kwargs):
+        session = get_session(session)
         
+        if id is not None:
+            kwargs['id'] = id
         
-    
+        args = list(args)
+        for k, v in kwargs.iteritems():
+            args.append(cond.Equals(k, v))
+            
+        cursor = session.cursor()
+        
+        cond_string, cond_args = cond.And(*args).render()
+        cursor.execute(
+            'SELECT {col_names} FROM {tname} WHERE {conds}'.format(
+                col_names = cls._get_column_names(),
+                tname = cls.name,
+                conds = cond_string,
+            ),
+            cond_args,
+        )
+        if cursor.rowcount == 1:
+            r = cls.hydrate(cursor.fetchone())
+            session.add(r)
+            return r
+        elif cursor.rowcount == 0:
+            raise NotFound, "Didn't find anything"
+        else:
+            raise TooManyFound, "Found more than one row"
+        
+    @classmethod
+    def hydrate(cls, tup):
+        """Hydrates the object from given tuple"""
+        self = cls.__new__(cls)
+        for col, v in zip(cls.columns, tup):
+            setattr(self, col.name, v)
+            
+        return self

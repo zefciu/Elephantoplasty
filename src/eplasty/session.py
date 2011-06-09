@@ -6,5 +6,12 @@ and are able to flush them to database
     
     def __init__(self, connection):
         self.connection = connection
-        self.cursors = []
+        # self.cursors = []
         self.objects = []
+        
+    def cursor(self):
+        return self.connection.cursor()
+    
+    def add(self, o):
+        self.objects.append(o)
+        
