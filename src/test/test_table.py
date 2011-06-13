@@ -10,10 +10,8 @@ class Test(unittest.TestCase):
     def setUp(self):
         class TestTable(Table):
             name = 'testing'
-            columns = [
-                CharacterVarying('name', length = 40),
-                Integer('score'),
-            ]
+            surname = CharacterVarying(40)
+            score = Integer()
             
         self.TestTable = TestTable
         self.connection = get_connection()
@@ -47,12 +45,12 @@ class Test(unittest.TestCase):
     def testInsert(self):
         self.TestTable.create_table(ctx = self.connection)
         cur = self.connection.cursor()
-        row = self.TestTable(name = 'Jane Doe', score = 102) 
+        row = self.TestTable(surname = 'Jane Doe', score = 102) 
         row.flush(cur)
         cur.execute('SELECT * FROM testing WHERE 1=1')
         r = cur.fetchmany()
         
-        self.assertEqual(r, [(1, 'Jane Doe', 102)])
+        self.assertEqual(set(r[0]), set((1, 'Jane Doe', 102)))
 
 if __name__ == "__main__":
     unittest.main()

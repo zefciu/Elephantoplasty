@@ -26,10 +26,8 @@ class TestGetFind(unittest.TestCase):
         
         class TestTable(Table):
             name = 'testing'
-            columns = [
-                CharacterVarying('surname', length = 40),
-                Integer('score'),
-            ]
+            surname = CharacterVarying(length = 40)
+            score = Integer()
             
         TestTable.create_table(self.connection)
             

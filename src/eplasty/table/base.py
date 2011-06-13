@@ -1,30 +1,27 @@
 from eplasty.ctx import get_cursor, get_session
-from eplasty.column import BigSerial
 from eplasty import conditions as cond
-
-class SearchError(Exception):
-    """Any problems with searches"""
-
-class NotFound(SearchError):
-    """No row found when one was expected"""
-
-class TooManyFound(SearchError):
-    """Too many rows found"""
+from eplasty.table.meta import TableMeta
+from eplasty.table.exc import NotFound, TooManyFound
+from eplasty.table.const import NEW, UNCHANGED
 
 class Table(object):
     """Parent class for all table classes"""
+    __metaclass__ = TableMeta
     
     def __init__(self, **kwargs):
         if not self.columns:
             raise NotImplementedError, 'Virtual class'
         
         col_names = [col.name for col in self.columns]
+        self._current = dict()
         for k, v in kwargs.iteritems():
             if k not in col_names:
                 raise TypeError, 'Column {0} not in table {1}'.format(
                     k, self.name
                 )
-            setattr(self, k, v)
+            self._current[k] = v
+            
+        self._status = NEW
     
     def flush(self, cursor):
         """
@@ -33,9 +30,9 @@ Flush this object to database using given cursor
         col_names = []
         col_values = []
         for col in self.columns:
-            if hasattr(self, col.name):
+            if col.name in self._current:
                 col_names.append(col.name)
-                col_values.append(getattr(self, col.name))
+                col_values.append(self._current[col.name])
         try:
             cursor.execute(
                 'INSERT INTO {0} ({1}) VALUES ({2})'.format(
@@ -56,7 +53,6 @@ Flush this object to database using given cursor
     @classmethod
     def create_table(cls, ctx = None):
         cursor = get_cursor(ctx)
-        cls.columns.insert(0, BigSerial('id'))
         column_decls = [c.declaration for c in cls.columns] 
         column_decls.append('CONSTRAINT id PRIMARY KEY (id)')
         command = """CREATE TABLE {tname}
@@ -104,7 +100,12 @@ Flush this object to database using given cursor
     def hydrate(cls, tup):
         """Hydrates the object from given tuple"""
         self = cls.__new__(cls)
+        dict_ = dict()
         for col, v in zip(cls.columns, tup):
-            setattr(self, col.name, v)
+            dict_[col.name] = v
+        
+        self._initial = dict_.copy()
+        self._current = dict_.copy()
+        self._status = UNCHANGED
             
         return self
