@@ -8,7 +8,7 @@ setup(
       author = u'Szymon Pyżalski',
       author_email = 'zefciu <szymon@pythonista.net>',
       description = 'A PostgreSQL ORM',
-      license = 'PSF',
+      license = 'BSD',
       keywords = 'orm postgresql psql pg persistence sql relational database',
       long_description = """
       An ORM for PostgreSQL database engine. It is aimed to take full advantage
