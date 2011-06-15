@@ -2,15 +2,15 @@ from eplasty.ctx import get_cursor, get_session
 from eplasty import conditions as cond
 from eplasty.table.meta import TableMeta
 from eplasty.table.exc import NotFound, TooManyFound
-from eplasty.table.const import NEW, UNCHANGED
+from eplasty.table.const import NEW, UNCHANGED, MODIFIED
 
 class Table(object):
     """Parent class for all table classes"""
     __metaclass__ = TableMeta
     
     def __init__(self, **kwargs):
-        if not self.columns:
-            raise NotImplementedError, 'Virtual class'
+        if self._abstract:
+            raise NotImplementedError, 'Abstract class'
         
         col_names = [col.name for col in self.columns]
         self._current = dict()
@@ -22,11 +22,18 @@ class Table(object):
             self._current[k] = v
             
         self._status = NEW
+        
+    @property
+    def diff(self):
+        r = {}
+        for c in self.columns:
+            n = c.name
+            if self._initial[n] != self._current[n]:
+                r[n] = (self._initial[n], self._current[n])
+                
+        return r
     
-    def flush(self, cursor):
-        """
-Flush this object to database using given cursor
-        """
+    def _flush_new(self, cursor):
         col_names = []
         col_values = []
         for col in self.columns:
@@ -42,14 +49,40 @@ Flush this object to database using given cursor
                 col_values
             )
         except Exception as e:
-            if e.pgcode == '42P01':
-                print e.pgerror
+            if e.pgcode == '42P01': # Table doesn't exist
                 cursor.connection.commit()
                 type(self).create_table(cursor)
-                self.flush(cursor) # Should recurse only once
+                self._flush_new(cursor)
             else:
-                print 'PGCODE: {0}'.format(e.pgcode)
                 raise
+            
+    def _flush_modified(self, cursor):
+        diff = self.diff
+        col_names = []
+        col_values = []
+        
+        for k, v in diff.iteritems():
+            was, is_ = v
+            col_names.append('{0} = %s'.format(k))
+            col_values.append(is_)
+            
+        pk = self._current['id']
+        col_names = ', '.join(col_names)
+        
+        cursor.execute(
+            'UPDATE {0} SET {1} WHERE id = %s'.format(
+                self.__table_name__, col_names
+            ), col_values + [pk]
+        )
+    
+    def flush(self, cursor):
+        """
+Flush this object to database using given cursor
+        """
+        if self._status == NEW:
+            self._flush_new(cursor)
+        elif self._status == MODIFIED:
+            self._flush_modified(cursor)
             
     
     @classmethod

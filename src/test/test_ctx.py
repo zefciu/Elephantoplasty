@@ -5,7 +5,7 @@ Created on Jun 7, 2011
 '''
 import unittest
 from eplasty.ctx import del_context, set_context, get_cursor, CtxError
-from util import get_connection
+from util import get_test_conn
 
 
 class Test(unittest.TestCase):
@@ -20,11 +20,11 @@ class Test(unittest.TestCase):
 
 
     def test_set_with_connection(self):
-        set_context(get_connection())
+        set_context(get_test_conn())
         get_cursor() #Passes when no error
         
     def test_set_with_cursor(self):
-        set_context(get_connection().cursor())
+        set_context(get_test_conn().cursor())
         get_cursor() #Passes when no error
         
     def test_unset_connection(self):

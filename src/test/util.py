@@ -11,7 +11,7 @@ config_file = os.path.join(
 config = SafeConfigParser()
 config.read(config_file)
 
-def get_connection():
+def get_test_conn():
     return connect(
         host = config.get('db', 'host'),
         port = config.get('db', 'port'),

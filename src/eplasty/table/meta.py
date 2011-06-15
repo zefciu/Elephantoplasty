@@ -11,8 +11,9 @@ class TableMeta(type):
         ]
         
         if not columns:
-            cls.abstract = True
+            cls._abstract = True
         else:
+            cls._abstract = False
             cls._setup_non_abstract(classname, bases, dict_, columns)
         
         super(TableMeta, cls).__init__(classname, bases, dict_)
