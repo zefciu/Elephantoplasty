@@ -97,6 +97,23 @@ def start_session():
     global ctx
     ctx.session = Session(get_connection())
     
+def commit():
+    """Commit the global session"""
+    global ctx
+    if ctx.session:
+        ctx.session.commit()
+    else:
+        raise CtxError, 'No session in global context'
+    
+def add(*args, **kwargs):
+    """Add to global session"""
+    global ctx
+    if ctx.session:
+        ctx.session.add(*args, **kwargs)
+    else:
+        raise CtxError, 'No session in global context'
+        
+
 def is_global_session():
     """Check if global session exists and return it or false""" 
     global ctx
@@ -111,3 +128,4 @@ def get_session(s):
     if s:
         return s
     raise CtxError, 'Cannot find a session'
+

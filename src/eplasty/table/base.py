@@ -36,13 +36,21 @@ Flush this object to database using given cursor
         try:
             cursor.execute(
                 'INSERT INTO {0} ({1}) VALUES ({2})'.format(
-                    type(self).name, ', '.join(col_names),
+                    type(self).__table_name__, ', '.join(col_names),
                     ', '.join(['%s'] * len(col_names))
                 ), 
                 col_values
             )
         except Exception as e:
-            raise # TODO
+            if e.pgcode == '42P01':
+                print e.pgerror
+                cursor.connection.commit()
+                type(self).create_table(cursor)
+                self.flush(cursor) # Should recurse only once
+            else:
+                print 'PGCODE: {0}'.format(e.pgcode)
+                raise
+            
     
     @classmethod
     def _get_column_names(cls):
@@ -54,12 +62,12 @@ Flush this object to database using given cursor
     def create_table(cls, ctx = None):
         cursor = get_cursor(ctx)
         column_decls = [c.declaration for c in cls.columns] 
-        column_decls.append('CONSTRAINT id PRIMARY KEY (id)')
+        column_decls.append('PRIMARY KEY (id)')
         command = """CREATE TABLE {tname}
         (
         {columns}
         );""".format(
-            tname = cls.name, columns = ',\n'.join(column_decls)
+            tname = cls.__table_name__, columns = ',\n'.join(column_decls)
         )
         
         cursor.execute(command)
@@ -82,7 +90,7 @@ Flush this object to database using given cursor
         cursor.execute(
             'SELECT {col_names} FROM {tname} WHERE {conds}'.format(
                 col_names = cls._get_column_names(),
-                tname = cls.name,
+                tname = cls.__table_name__,
                 conds = cond_string,
             ),
             cond_args,

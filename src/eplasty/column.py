@@ -1,6 +1,5 @@
 from psycopg2.extensions import adapt
 
-from eplasty.table.const import MODIFIED, UNCHANGED, UPDATED
 
 class Column(object):
     """Base class for all columns. Columns are descriptors."""
@@ -27,6 +26,7 @@ class Column(object):
         return False
     
     def __set__(self, inst, v):
+        from eplasty.table.const import MODIFIED, UNCHANGED, UPDATED
         if not self._is_compatible(v):
             raise TypeError, ('Python type {0} is not compatible with column'
                 'type {1}').format(type(v), type(self))
