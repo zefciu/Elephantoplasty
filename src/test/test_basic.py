@@ -3,6 +3,7 @@ from eplasty import column as c
 from eplasty.table import Table
 from eplasty.ctx import set_context, start_session, commit, add, get_connection
 from util import get_test_conn
+from eplasty.table.exc import NotFound, TooManyFound
 
 class Test(unittest.TestCase):
     """
@@ -67,7 +68,20 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         commit()
         k_got = self.Knight.get(2)
         self.assertEqual(k_got.name, 'John')
-
+        
+    def test_incompatible(self):
+        k = self.Knight.get(2)
+        def broken():
+            k.name = 1
+        self.assertRaises(TypeError, broken)
+        
+    def test_not_found(self):
+        """Test a get() not finding anything"""
+        self.assertRaises(NotFound, lambda: self.Knight.get(title = 'Mrs'))
+        
+    def test_too_many(self):
+        """Test a get() finding too much"""
+        self.assertRaises(TooManyFound, lambda: self.Knight.get(title = 'Sir'))
 
 if __name__ == "__main__":
     unittest.main()

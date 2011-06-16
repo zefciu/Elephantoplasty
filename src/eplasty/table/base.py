@@ -16,8 +16,8 @@ class Table(object):
         self._current = dict()
         for k, v in kwargs.iteritems():
             if k not in col_names:
-                raise TypeError, 'Column {0} not in table {1}'.format(
-                    k, self.name
+                raise TypeError, 'Class {0} has no attribute {1}'.format(
+                    type(self).__name__, k
                 )
             self._current[k] = v
             
@@ -62,7 +62,7 @@ class Table(object):
         col_values = []
         
         for k, v in diff.iteritems():
-            was, is_ = v
+            was, is_ = v #@UnusedVariable
             col_names.append('{0} = %s'.format(k))
             col_values.append(is_)
             

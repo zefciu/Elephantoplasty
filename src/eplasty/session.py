@@ -1,4 +1,3 @@
-from eplasty.table.const import NEW, MODIFIED, UPDATED
 class Session(object):
     """
 The sessions are orm wrappers of connections. They store the objects
@@ -17,6 +16,7 @@ and are able to flush them to database
         self.objects.append(o)
         
     def flush(self):
+        from eplasty.table.const import NEW, MODIFIED, UPDATED
         cursor = self.cursor()
         for o in self.objects:
             if o._status in [NEW, MODIFIED, UPDATED]:

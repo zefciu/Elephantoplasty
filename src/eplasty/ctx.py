@@ -91,6 +91,7 @@ def del_context():
     
     ctx.connection = None
     ctx.cursor = None
+    ctx.session = None
 
 def start_session():
     """Start the session in global context"""
@@ -119,7 +120,7 @@ def is_global_session():
     global ctx
     return ctx.session or False
     
-def get_session(s):
+def get_session(s = None):
     """Return its argument or global session. If neither is present, raise
     CtxError"""
     if s:
@@ -128,4 +129,3 @@ def get_session(s):
     if s:
         return s
     raise CtxError, 'Cannot find a session'
-
