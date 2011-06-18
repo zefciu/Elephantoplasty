@@ -5,6 +5,11 @@ class Condition(object):
     def render(self):
         raise NotImplementedError
     
+class All():
+    """Get all rows"""
+    def render(self):
+        return '1 = 1', tuple()
+    
 class Equals(Condition):
     """Simple equality condition"""
     def __init__(self, col_name, value):
@@ -15,7 +20,7 @@ class Equals(Condition):
         return '{0} = %s'.format(self.col_name), (self.value,)
 
 class And(Condition):
-    """Logical and of several conditions"""
+    """Logical AND of several conditions"""
     def __init__(self, *args):
         self.args = args
         

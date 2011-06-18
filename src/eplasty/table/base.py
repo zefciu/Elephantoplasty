@@ -1,8 +1,12 @@
+from base64 import b64encode
+from hashlib import sha1
+
 from eplasty.ctx import get_cursor, get_session
 from eplasty import conditions as cond
 from eplasty.table.meta import TableMeta
 from eplasty.table.exc import NotFound, TooManyFound
 from eplasty.table.const import NEW, UNCHANGED, MODIFIED
+from eplasty.result import Result
 
 class Table(object):
     """Parent class for all table classes"""
@@ -92,6 +96,33 @@ Flush this object to database using given cursor
         return ','.join((c.name for c in cls.columns))
     
     @classmethod
+    def _get_conditions(cls, *args, **kwargs):
+        """Reformats args and kwargs to a ``Condition`` object"""
+        args = list(args)
+        for k, v in kwargs.iteritems():
+            args.append(cond.Equals(k, v))
+        
+        if not args:
+            return cond.All()
+            
+        return cond.And(*args)
+    
+    @classmethod
+    def _get_query(cls, condition):
+        """Returns tuple to be executed for this class and given
+        ``condition``"""
+        cond_string, cond_args = condition.render()
+        return(
+            'SELECT {col_names} FROM {tname} WHERE {conds}'.format(
+                col_names = cls._get_column_names(),
+                tname = cls.__table_name__,
+                conds = cond_string,
+            ),
+            cond_args,
+        )
+        
+    
+    @classmethod
     def create_table(cls, ctx = None):
         cursor = get_cursor(ctx)
         column_decls = [c.declaration for c in cls.columns] 
@@ -113,21 +144,12 @@ Flush this object to database using given cursor
         if id is not None:
             kwargs['id'] = id
         
-        args = list(args)
-        for k, v in kwargs.iteritems():
-            args.append(cond.Equals(k, v))
             
         cursor = session.cursor()
         
-        cond_string, cond_args = cond.And(*args).render()
-        cursor.execute(
-            'SELECT {col_names} FROM {tname} WHERE {conds}'.format(
-                col_names = cls._get_column_names(),
-                tname = cls.__table_name__,
-                conds = cond_string,
-            ),
-            cond_args,
-        )
+        condition = cls._get_conditions(*args, **kwargs)
+        cursor.execute(*cls._get_query(condition))
+        
         if cursor.rowcount == 1:
             r = cls.hydrate(cursor.fetchone())
             session.add(r)
@@ -136,6 +158,20 @@ Flush this object to database using given cursor
             raise NotFound, "Didn't find anything"
         else:
             raise TooManyFound, "Found more than one row"
+    
+    @classmethod
+    def find(cls, session = None, *args, **kwargs):
+        """Execute the query on this table and return a ``Result`` object."""
+        session = get_session(session)
+        tmp_cursor = session.cursor()
+        condition = cls._get_conditions(*args, **kwargs)
+        
+        query = cls._get_query(condition)
+        query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
+        cursor = session.cursor(query_hash)
+        cursor.execute(*query)
+        
+        return Result(cursor, cls)
         
     @classmethod
     def hydrate(cls, tup):

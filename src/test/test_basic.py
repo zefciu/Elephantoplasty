@@ -55,6 +55,19 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         self.assertEqual(k.nickname, None)
         self.assertEqual(k.score, 20)
         
+    def test_find(self):
+        knights = self.Knight.find(title = 'Sir')
+        names = set((k.name for k in knights))
+        self.assertEqual(names, set(['Lancelot', 'Galahad', 'Robin']))
+        knights.cursor.close()
+        knights2 = self.Knight.find()
+        objects = knights2.fetch(10)
+        self.assertEqual(len(objects), 4)
+        knights2.cursor.close()
+        
+        
+        
+        
     def test_deft(self):
         k = self.Knight(name = 'Doris', nickname = 'The Hamster', score = 999)
         add(k)

@@ -9,8 +9,8 @@ and are able to flush them to database
         # self.cursors = []
         self.objects = []
         
-    def cursor(self):
-        return self.connection.cursor()
+    def cursor(self, *args, **kwargs):
+        return self.connection.cursor(*args, **kwargs)
     
     def add(self, o):
         self.objects.append(o)
