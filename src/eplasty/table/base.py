@@ -26,6 +26,7 @@ class Table(object):
             self._current[k] = v
             
         self._status = NEW
+        self._flushed = False
         
     @property
     def diff(self):
@@ -44,21 +45,13 @@ class Table(object):
             if col.name in self._current:
                 col_names.append(col.name)
                 col_values.append(self._current[col.name])
-        try:
-            cursor.execute(
-                'INSERT INTO {0} ({1}) VALUES ({2})'.format(
-                    type(self).__table_name__, ', '.join(col_names),
-                    ', '.join(['%s'] * len(col_names))
-                ), 
-                col_values
-            )
-        except Exception as e:
-            if e.pgcode == '42P01': # Table doesn't exist
-                cursor.connection.commit()
-                type(self).create_table(cursor)
-                self._flush_new(cursor)
-            else:
-                raise
+        cursor.execute(
+            'INSERT INTO {0} ({1}) VALUES ({2})'.format(
+                type(self).__table_name__, ', '.join(col_names),
+                ', '.join(['%s'] * len(col_names))
+            ), 
+            col_values
+        )
             
     def _flush_modified(self, cursor):
         diff = self.diff
@@ -184,5 +177,6 @@ Flush this object to database using given cursor
         self._initial = dict_.copy()
         self._current = dict_.copy()
         self._status = UNCHANGED
+        self._flushed = False
             
         return self

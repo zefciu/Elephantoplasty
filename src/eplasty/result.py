@@ -12,7 +12,6 @@ class ResultIterator(object):
             raise StopIteration
         
         
-        
 class Result(object):
     """Wrapper around server-side cursor"""
     
@@ -23,7 +22,6 @@ class Result(object):
     def __iter__(self):
         """Temporary solution I think"""
         return ResultIterator(self)
-    
     
     def fetch(self, count):
         """Fetch ``count`` objects"""
