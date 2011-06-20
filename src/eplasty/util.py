@@ -17,6 +17,18 @@ def clsname2tname(clsname):
         return sing + 's'
     
     
+class queue_iterator(object):
+    """This list iterator uses ``pop()`` to iterate over a list, so it empties
+    a list and allows to append stuff to the list while iterating"""
     
+    def __init__(self, list_):
+        self.list_ = list_
+        
+    def __iter__(self):
+        return self
     
-    
+    def next(self):
+        try:
+            return self.list_.pop(0)
+        except IndexError:
+            raise StopIteration

@@ -1,4 +1,5 @@
 from psycopg2 import ProgrammingError
+from eplasty.util import queue_iterator
 class Session(object):
     """
 The sessions are orm wrappers of connections. They store the objects
@@ -25,8 +26,12 @@ and are able to flush them to database
     def flush(self):
         from eplasty.table.const import NEW, MODIFIED, UPDATED, UNCHANGED
         cursor = self.cursor()
-        for o in self.objects:
+        queue = self.objects[:]
+        for o in queue_iterator(queue):
             if o._status in [NEW, MODIFIED, UPDATED] and not o._flushed:
+                if o._has_unflushed_dependencies():
+                    queue.append(o)
+                    continue
                 try:
                     o.flush(cursor)
                     o._flushed = True

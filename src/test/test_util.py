@@ -17,6 +17,21 @@ class Test(unittest.TestCase):
             'bitter_cherries'
         )
         
+    def test_queue(self):
+        """Test the queue_iterator"""
+        input = ['aa', 'ba', 'ab', 'bb', 'ac', 'bc']
+        result = []
+        for el in util.queue_iterator(input):
+            if el[0] == 'a':
+                input.append('x' + el)
+            else:
+                result.append(el)
+                
+        self.assertEqual(
+            result, ['ba', 'bb', 'bc', 'xaa', 'xab', 'xac']
+        )
+            
+        
 
 
 if __name__ == "__main__":

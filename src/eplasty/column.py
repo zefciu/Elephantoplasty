@@ -3,7 +3,9 @@ from psycopg2.extensions import adapt
 
 class Column(object):
     """Base class for all columns. Columns are descriptors."""
-    __slots__ = ['name', 'pqtype', 'length', 'attrs']
+    __slots__ = ['name', 'pgtype', 'length', 'attrs', 'constraint']
+    
+    constraint = None
     
     def __init__(self, name = None, length = None, null= True, default = False):
         self.name = name
@@ -39,9 +41,9 @@ class Column(object):
     
     @property
     def declaration(self):
-        return "{name} {pqtype}{length} {attrs}".format(
+        return "{name} {pgtype}{length} {attrs}".format(
             name = self.name,
-            pqtype = self.pqtype,
+            pgtype = self.pgtype,
             length = '({0})'.format(self.length) if self.length else '',
             attrs = ' '.join(self.attrs),
         )
@@ -50,21 +52,37 @@ class Column(object):
         """Adds name to the column and returns self"""
         self.name = name
         return self
+    
+    def hydrate(self, value):
+        """Transform raw value from database to object version"""
+        return value
+    
+    @classmethod
+    def get_raw(cls, value):
+        """Get the value as it will appear in the database
+        """
+        return value
+    
+    @classmethod
+    def get_dependencies(self, value):
+        """Get a list of objects that should be flushed before this one"""
+        return []
+    
         
         
     
 class BigSerial(Column):
     """PostgreSQL BigSerial type"""
-    pqtype = 'bigserial'
+    pgtype = 'bigserial'
     compat_types = [] #R/O
     
     
 class Integer(Column):
     """PostgreSQL integer type"""
-    pqtype = 'integer'
+    pgtype = 'integer'
     compat_types = [int]
     
     
 class CharacterVarying(Column):
-    pqtype = 'character varying'
+    pgtype = 'character varying'
     compat_types = [basestring]

@@ -1,8 +1,8 @@
 from base64 import b64encode
 from hashlib import sha1
 
-from eplasty.ctx import get_cursor, get_session
 from eplasty import conditions as cond
+from eplasty.ctx import get_cursor, get_session
 from eplasty.table.meta import TableMeta
 from eplasty.table.exc import NotFound, TooManyFound
 from eplasty.table.const import NEW, UNCHANGED, MODIFIED
@@ -29,12 +29,12 @@ class Table(object):
         self._flushed = False
         
     @property
-    def diff(self):
-        r = {}
+    def _diff(self):
+        r = []
         for c in self.columns:
             n = c.name
             if self._initial[n] != self._current[n]:
-                r[n] = (self._initial[n], self._current[n])
+                r.append ((c, (self._initial[n], self._current[n])))
                 
         return r
     
@@ -44,24 +44,27 @@ class Table(object):
         for col in self.columns:
             if col.name in self._current:
                 col_names.append(col.name)
-                col_values.append(self._current[col.name])
+                col_values.append(type(col).get_raw(self._current[col.name]))
         cursor.execute(
-            'INSERT INTO {0} ({1}) VALUES ({2})'.format(
+            'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),
-                ', '.join(['%s'] * len(col_names))
+                ', '.join(['%s'] * len(col_names)),
+                type(self).pk
             ), 
             col_values
         )
+        new_pk_val = cursor.fetchone()[0]
+        self._current[type(self).pk] = new_pk_val
+        self._initial = self._current.copy()
             
     def _flush_modified(self, cursor):
-        diff = self.diff
+        diff = self._diff
         col_names = []
         col_values = []
         
-        for k, v in diff.iteritems():
-            was, is_ = v #@UnusedVariable
-            col_names.append('{0} = %s'.format(k))
-            col_values.append(is_)
+        for col, (was, is_) in diff: #@UnusedVariable
+            col_names.append('{0} = %s'.format(col.name))
+            col_values.append(type(col).get_raw(is_))
             
         pk = self._current['id']
         col_names = ', '.join(col_names)
@@ -118,13 +121,20 @@ Flush this object to database using given cursor
     @classmethod
     def create_table(cls, ctx = None):
         cursor = get_cursor(ctx)
-        column_decls = [c.declaration for c in cls.columns] 
-        column_decls.append('PRIMARY KEY (id)')
+        column_decls = []
+        constraints = []
+        for c in cls.columns:
+            column_decls.append(c.declaration) 
+            if c.constraint:
+                constraints.append(c.constraint)
+        constraints.append('PRIMARY KEY (id)')
         command = """CREATE TABLE {tname}
         (
         {columns}
         );""".format(
-            tname = cls.__table_name__, columns = ',\n'.join(column_decls)
+            tname = cls.__table_name__, columns = ',\n'.join(
+                column_decls + constraints
+            )
         )
         
         cursor.execute(command)
@@ -172,7 +182,7 @@ Flush this object to database using given cursor
         self = cls.__new__(cls)
         dict_ = dict()
         for col, v in zip(cls.columns, tup):
-            dict_[col.name] = v
+            dict_[col.name] = col.hydrate(v)
         
         self._initial = dict_.copy()
         self._current = dict_.copy()
@@ -180,3 +190,25 @@ Flush this object to database using given cursor
         self._flushed = False
             
         return self
+    
+    @classmethod
+    def get_pk(cls):
+        """Temporal solution before composite pk's are implemented"""
+        for c in cls.columns:
+            if c.name == cls.pk:
+                return c
+            
+    def get_pk_value(self):
+        """As above"""
+        return self._current[self.pk]
+    
+    def _has_unflushed_dependencies(self):
+        """Tells if there are some objects that should be flushed before this
+        one"""
+        result = []
+        for c in self.columns:
+            if c.name in self._current:
+                for d in type(c).get_dependencies(self._current[c.name]):
+                    if d._status == 'NEW' and not d._flushed:
+                        result.append(d)
+        return result or False
