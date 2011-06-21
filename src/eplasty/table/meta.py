@@ -28,15 +28,15 @@ selecting a table name"""
             p_cls.columns for p_cls in cls.parent_classes
         ], [])
             
-        if 'pk' not in dict_:
+        if '__pk__' not in dict_:
             if cls.parent_classes: 
-                dict_['pk'] = cls.parent_classes[0].pk
+                dict_['__pk__'] = cls.parent_classes[0].__pk__
             else:
                 columns.insert(0, BigSerial('id'))
-                dict_['pk'] = ('id')
+                dict_['__pk__'] = 'id'
             
-        cls.pk = dict_['pk']
-        dict_.pop('pk', None)
+        cls.__pk__ = dict_['__pk__']
+        dict_.pop('__pk__', None)
             
         cls.columns = columns
         

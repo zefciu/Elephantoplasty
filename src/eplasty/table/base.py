@@ -52,12 +52,12 @@ class Table(object):
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),
                 ', '.join(['%s'] * len(col_names)),
-                type(self).pk
+                type(self).__pk__
             ), 
             col_values
         )
         new_pk_val = cursor.fetchone()[0]
-        self._current[type(self).pk] = new_pk_val
+        self._current[type(self).__pk__] = new_pk_val
         self._initial = self._current.copy()
             
     def _flush_modified(self, cursor):
@@ -176,12 +176,12 @@ Flush this object to database using given cursor
     def get_pk(cls):
         """Temporal solution before composite pk's are implemented"""
         for c in cls.columns:
-            if c.name == cls.pk:
+            if c.name == cls.__pk__:
                 return c
             
     def get_pk_value(self):
         """As above"""
-        return self._current[self.pk]
+        return self._current[self.__pk__]
     
     def _has_unflushed_dependencies(self):
         """Tells if there are some objects that should be flushed before this
