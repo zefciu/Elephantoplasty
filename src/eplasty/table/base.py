@@ -1,8 +1,9 @@
 from base64 import b64encode
 from hashlib import sha1
+import itertools as it
 
 from eplasty import conditions as cond
-from eplasty.ctx import get_cursor, get_session
+from eplasty.ctx import get_session
 from eplasty.table.meta import TableMeta
 from eplasty.table.exc import NotFound, TooManyFound
 from eplasty.table.const import NEW, UNCHANGED, MODIFIED
@@ -16,7 +17,9 @@ class Table(object):
         if self._abstract:
             raise NotImplementedError, 'Abstract class'
         
-        col_names = [col.name for col in self.columns]
+        col_names = [
+            col.name for col in it.chain(self.columns, self.inh_columns)
+        ]
         self._current = dict()
         for k, v in kwargs.iteritems():
             if k not in col_names:
@@ -41,7 +44,7 @@ class Table(object):
     def _flush_new(self, cursor):
         col_names = []
         col_values = []
-        for col in self.columns:
+        for col in it.chain(self.columns, self.inh_columns):
             if col.name in self._current:
                 col_names.append(col.name)
                 col_values.append(type(col).get_raw(self._current[col.name]))
@@ -86,10 +89,11 @@ Flush this object to database using given cursor
             
     
     @classmethod
-    def _get_column_names(cls):
+    def _get_column_names(cls, all = False):
         """Returns column names as a comma separated string to be used in
         SQL queries"""
-        return ','.join((c.name for c in cls.columns))
+        columns = it.chain(cls.columns, cls.inh_columns) if all else cls.columns
+        return ','.join((c.name for c in columns))
     
     @classmethod
     def _get_conditions(cls, *args, **kwargs):
@@ -116,29 +120,6 @@ Flush this object to database using given cursor
             ),
             cond_args,
         )
-        
-    
-    @classmethod
-    def create_table(cls, ctx = None):
-        cursor = get_cursor(ctx)
-        column_decls = []
-        constraints = []
-        for c in cls.columns:
-            column_decls.append(c.declaration) 
-            if c.constraint:
-                constraints.append(c.constraint)
-        constraints.append('PRIMARY KEY (id)')
-        command = """CREATE TABLE {tname}
-        (
-        {columns}
-        );""".format(
-            tname = cls.__table_name__, columns = ',\n'.join(
-                column_decls + constraints
-            )
-        )
-        
-        cursor.execute(command)
-        cursor.connection.commit()
         
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):

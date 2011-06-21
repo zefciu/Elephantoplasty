@@ -1,5 +1,6 @@
 from eplasty.column import BigSerial, Column
 from eplasty.util import clsname2tname
+from eplasty.ctx import get_cursor
 
 class TableMeta(type):
     """Metaclass for table types"""
@@ -22,14 +23,22 @@ class TableMeta(type):
         """Setups the non-abstract class creating primary key if needed and
 selecting a table name"""
 
+        cls.parent_classes = [b for b in bases if not b._abstract]
+        cls.inh_columns = sum([
+            p_cls.columns for p_cls in cls.parent_classes
+        ], [])
+            
         if 'pk' not in dict_:
-            columns.insert(0, BigSerial('id'))
-            dict_['pk'] = ('id')
+            if cls.parent_classes: 
+                dict_['pk'] = cls.parent_classes[0].pk
+            else:
+                columns.insert(0, BigSerial('id'))
+                dict_['pk'] = ('id')
             
         cls.pk = dict_['pk']
-        cls.columns = columns
-         
         dict_.pop('pk', None)
+            
+        cls.columns = columns
         
         if '__table_name__' in dict_:
             cls.__table_name__ = dict_['__table_name__']
@@ -37,5 +46,29 @@ selecting a table name"""
             cls.__table_name__ = clsname2tname(classname)
             
         dict_.pop('__table_name__', None)
+
+    def create_table(cls, ctx = None): #@NoSelf
+        cursor = get_cursor(ctx)
+        column_decls = []
+        constraints = []
+        for c in cls.columns:
+            column_decls.append(c.declaration) 
+            if c.constraint:
+                constraints.append(c.constraint)
+        constraints.append('PRIMARY KEY (id)')
+        command = """CREATE TABLE {tname}
+        (
+        {columns}
+        )
+        {inh_clause};""".format(
+            tname = cls.__table_name__, columns = ',\n'.join(
+                column_decls + constraints
+            ), inh_clause = (
+                'INHERITS ({0})'.format(', '.join((
+                    c.__table_name__ for c in cls.parent_classes)
+                )) if cls.parent_classes else ''
+            )
+        )
         
-        
+        cursor.execute(command)
+        cursor.connection.commit()
