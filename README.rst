@@ -26,3 +26,6 @@ TODO
 1. Different relation loading strategies (lazy, joined etc).
 2. Many-to-many
 3. EAFTP table migration
+4. Identities
+5. Concurrency control
+6. Conflict detection

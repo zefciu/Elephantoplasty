@@ -181,7 +181,10 @@ Flush this object to database using given cursor
             
     def get_pk_value(self):
         """As above"""
-        return self._current[self.__pk__]
+        try:
+            return self._current[self.__pk__]
+        except KeyError:
+            return None
     
     def _has_unflushed_dependencies(self):
         """Tells if there are some objects that should be flushed before this
