@@ -11,21 +11,23 @@ Philosophy
    all features of Postgres we need to drop portability to weaker engines.
 2. Simple things should be simple, complicated things should be possible.
    The ORM should guess all the obvious things, but allow to override them.
-3. Where possible use pythonic strategy EAFTP. If database seems to be not
+3. Where possible use pythonic EAFTP strategy. If database seems to be not
    in sync with ORM try to migrate.
 
 DONE
 -----------------
-1. Simple tables.
-2. Inheritance.
-3. Simplest one-to-many
-4. EAFTP table creation
+
+#. Simple tables.
+#. Inheritance.
+#. Simplest one-to-many
+#. EAFTP table creation
+#. Simplest identities
 
 TODO
 ------------------
-1. Different relation loading strategies (lazy, joined etc).
-2. Many-to-many
-3. EAFTP table migration
-4. Identities
-5. Concurrency control
-6. Conflict detection
+#. Different relation loading strategies (lazy, joined etc).
+#. Many-to-many
+#. EAFTP table migration
+#. Concurrency control
+#. Conflict detection
+#. Advanced identities

@@ -6,10 +6,7 @@ class ResultIterator(object):
     
     def next(self):
         tup = self.cursoriterator.next()
-        if tup:
-            return self.cls.hydrate(tup)
-        else:
-            raise StopIteration
+        return self.cls.hydrate(tup)
         
         
 class Result(object):

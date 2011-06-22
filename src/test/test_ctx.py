@@ -8,6 +8,7 @@ from eplasty.ctx import del_context, set_context, get_cursor, CtxError, connect
 from eplasty.ctx import get_connection, commit, add, get_session
 from util import get_test_conn, config
 from psycopg2.extensions import cursor
+from eplasty.session import Session
 
 class Test(unittest.TestCase):
 
@@ -70,6 +71,11 @@ class Test(unittest.TestCase):
     def test_get_cursor_with_invalid(self):
         """Passing invalid type to get_cursor"""
         self.assertRaises(TypeError, lambda: get_cursor(1))
+        
+    def test_get_session_with_session(self):
+        """Passing a session to get_session() should return itself"""
+        session = Session(get_test_conn())
+        self.assertEqual(get_session(session), session)
         
 
 

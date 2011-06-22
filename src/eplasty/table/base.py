@@ -124,6 +124,9 @@ Flush this object to database using given cursor
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):
         session = get_session(session)
+        cached =  session.find_cached(cls.__table_name__, id)
+        if cached:
+            return cached
         
         if id is not None:
             kwargs['id'] = id
