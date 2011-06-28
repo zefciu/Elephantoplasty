@@ -1,12 +1,9 @@
-'''
-Foreign relationship descriptors
-'''
 from eplasty.column import Column
 
 NO_ACTION = 'NO ACTION'
 CASCADE = 'CASCADE'
 
-class BelongsTo(Column):
+class ManyToOne(Column):
     """Many-to-one relationship on the 'many' side"""
     
     def __init__(
@@ -20,7 +17,7 @@ class BelongsTo(Column):
         self.on_update = on_update
         self.on_delete = on_delete
         self.compat_types = [foreign_class]
-        super(BelongsTo, self).__init__(name = None, **kwargs)
+        super(ManyToOne, self).__init__(name = None, **kwargs)
         
     def hydrate(self, value):
         return self.foreign_class.get(value)

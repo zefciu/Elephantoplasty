@@ -4,7 +4,7 @@ from psycopg2 import ProgrammingError
 
 from eplasty.table.base import Table
 from eplasty.column import CharacterVarying
-from eplasty.relation import BelongsTo
+from eplasty.relation import ManyToOne
 from test.util import get_test_conn
 from eplasty.ctx import set_context, start_session, add, commit
 
@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
             
         class Character(Table):
             name = CharacterVarying(30)
-            movie = BelongsTo(Movie)
+            movie = ManyToOne(Movie)
         
         self.connection = get_test_conn()
         set_context(self.connection)
