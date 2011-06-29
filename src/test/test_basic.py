@@ -72,6 +72,7 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         k = self.Knight(name = 'Doris', nickname = 'The Hamster', score = 999)
         add(k)
         commit()
+        start_session()
         k_got = self.Knight.get(name = 'Doris')
         self.assertEqual(k_got.title, 'Sir')
         

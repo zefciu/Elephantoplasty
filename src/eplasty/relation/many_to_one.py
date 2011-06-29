@@ -1,7 +1,6 @@
 from eplasty.column import Column
+from const import NO_ACTION
 
-NO_ACTION = 'NO ACTION'
-CASCADE = 'CASCADE'
 
 class ManyToOne(Column):
     """Many-to-one relationship on the 'many' side"""
@@ -12,6 +11,9 @@ class ManyToOne(Column):
     ):
         self.foreign_class = foreign_class
         self.foreign_pk = self.foreign_class.get_pk()
+        if len(self.foreign_pk) != 1:
+            raise TypeError, "Referencing composite pk's not implemented"
+        self.foreign_pk = self.foreign_pk[0]
         self.pgtype = self.foreign_pk.pgtype
         self.length = self.foreign_pk.length
         self.on_update = on_update

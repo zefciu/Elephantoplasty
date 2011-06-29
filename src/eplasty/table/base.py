@@ -52,12 +52,15 @@ class Table(object):
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),
                 ', '.join(['%s'] * len(col_names)),
-                type(self).__pk__
+                ','.join(type(self).__pk__)
             ), 
             col_values
         )
-        new_pk_val = cursor.fetchone()[0]
-        self._current[type(self).__pk__] = new_pk_val
+        new_pk_val = cursor.fetchone()
+        for pk_val in it.izip(self.__pk__, new_pk_val):
+            col, val = pk_val
+            self._current[col] = val
+            
         self._initial = self._current.copy()
             
     def _flush_modified(self, cursor):
@@ -177,15 +180,13 @@ Flush this object to database using given cursor
     
     @classmethod
     def get_pk(cls):
-        """Temporal solution before composite pk's are implemented"""
-        for c in cls.columns:
-            if c.name == cls.__pk__:
-                return c
+        """Get the tuple of columns acting as pk"""
+        return tuple((c for c in cls.columns if c.name in cls.__pk__))
             
     def get_pk_value(self):
-        """As above"""
+        """Get the tuple of values for the pk or None"""
         try:
-            return self._current[self.__pk__]
+            return tuple((self._current[k] for k in type(self).__pk__))
         except KeyError:
             return None
     

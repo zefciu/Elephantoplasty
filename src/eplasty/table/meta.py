@@ -7,7 +7,7 @@ class TableMeta(type):
     
     def __init__(cls, classname, bases, dict_):
         columns = [
-            c.bind_name(n)
+            c.bind(cls, n)
             for n, c in dict_.iteritems() if isinstance(c, Column)
         ]
         
@@ -33,7 +33,7 @@ selecting a table name"""
                 dict_['__pk__'] = cls.parent_classes[0].__pk__
             else:
                 columns.insert(0, BigSerial('id'))
-                dict_['__pk__'] = 'id'
+                dict_['__pk__'] = ('id',)
             
         cls.__pk__ = dict_['__pk__']
         dict_.pop('__pk__', None)
@@ -55,7 +55,7 @@ selecting a table name"""
             column_decls.append(c.declaration) 
             if c.constraint:
                 constraints.append(c.constraint)
-        constraints.append('PRIMARY KEY (id)')
+        constraints.append('PRIMARY KEY ({0})'.format(','.join(cls.__pk__)))
         command = """CREATE TABLE {tname}
         (
         {columns}

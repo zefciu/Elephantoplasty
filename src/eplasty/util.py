@@ -6,15 +6,33 @@ import re
 
 CAPITAL = re.compile('[A-Z]')
 
+def camel2underscore(v):
+    """Transforms CamelCasedName to underscored_name"""
+    first = v[0].lower()
+    rest = v[1:]
+    return first + re.sub(CAPITAL, lambda x: '_' + x.group(0).lower(), rest)
+
 def clsname2tname(clsname):
     """Transforms the class name into default table name"""
-    first = clsname[0].lower()
-    rest = clsname[1:]
-    sing = first + re.sub(CAPITAL, lambda x: '_' + x.group(0).lower(), rest)
+    sing = camel2underscore(clsname)
     if sing[-1] == 'y':
         return sing[:-1] + 'ies'
     else:
         return sing + 's'
+    
+def clsname2kname(clsname):
+    """Transforms the class name into foreign key name"""
+    underscored = camel2underscore(clsname)
+    return '{0}_id'.format(underscored)
+
+def prepare_col(col):
+    """Checks if the given column is a tuple and reformats it to fit
+    PostgresSQL syntax"""
+    if isinstance(col, tuple):
+        return '({0})'.format(','.join(col))
+    else:
+        return col
+    
     
     
 class queue_iterator(object):

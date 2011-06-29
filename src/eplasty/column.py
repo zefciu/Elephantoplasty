@@ -48,8 +48,9 @@ class Column(object):
             attrs = ' '.join(self.attrs),
         )
         
-    def bind_name(self, name):
-        """Adds name to the column and returns self"""
+    def bind(self, cls, name):
+        """Adds owner class and name to the column and returns self"""
+        self.owner_class = cls
         self.name = name
         return self
     

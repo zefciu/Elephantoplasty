@@ -66,6 +66,8 @@ and are able to flush them to database
             del collection[:]
             
     def find_cached(self, table_name, pk_value):
+        if not isinstance (pk_value, tuple):
+            pk_value = pk_value,
         try:
             return self.pk_objects[table_name][pk_value]
         except KeyError:
