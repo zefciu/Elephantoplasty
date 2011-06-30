@@ -3,7 +3,10 @@ from psycopg2.extensions import adapt
 
 class Column(object):
     """Base class for all columns. Columns are descriptors."""
-    __slots__ = ['name', 'pgtype', 'length', 'attrs', 'constraint']
+    __slots__ = [
+        'name', 'pgtype', 'length', 'attrs', 'constraint', 'owner_class',
+        'owner'
+    ]
     
     constraint = None
     
@@ -13,12 +16,22 @@ class Column(object):
         self.null = null
         self.default = default
         
-        self.attrs = []
+        self.pgattrs = []
         
         if not null:
-            self.attrs.append('NOT NULL')
+            self.pgattrs.append('NOT NULL')
         if default is not False:
-            self.attrs.append('DEFAULT {0}'.format(adapt(default).getquoted()))
+            self.pgattrs.append('DEFAULT {0}'.format(adapt(default).getquoted()))
+            
+        self.attrs = []
+        self.kwattrs = dict(
+            name = name,
+            length = length,
+            null = null,
+            default = default
+        )
+        
+        self.owner_class = None
     
     def _is_compatible(self, v):
         """Checks if python variable is compatible with this column."""
@@ -41,11 +54,11 @@ class Column(object):
     
     @property
     def declaration(self):
-        return "{name} {pgtype}{length} {attrs}".format(
+        return "{name} {pgtype}{length} {pgattrs}".format(
             name = self.name,
             pgtype = self.pgtype,
             length = '({0})'.format(self.length) if self.length else '',
-            attrs = ' '.join(self.attrs),
+            pgattrs = ' '.join(self.pgattrs),
         )
         
     def bind(self, cls, name):
@@ -54,7 +67,18 @@ class Column(object):
         self.name = name
         return self
     
-    def hydrate(self, value):
+    def get_row_bound(self, row):
+        """Creates a copy of this column that is bound to a specific row"""
+        # import pdb; pdb.set_trace()
+        copy = type(self)(*self.attrs, **self.kwattrs)
+        copy.owner = row
+        copy.owner_class = self.owner_class
+        copy.name = self.name
+        return copy
+        
+        
+    
+    def hydrate(self, value, session):
         """Transform raw value from database to object version"""
         return value
     

@@ -19,9 +19,10 @@ class ManyToOne(Column):
         self.on_update = on_update
         self.on_delete = on_delete
         self.compat_types = [foreign_class]
-        super(ManyToOne, self).__init__(name = None, **kwargs)
+        super(ManyToOne, self).__init__(**kwargs)
+        self.attrs.append(foreign_class)
         
-    def hydrate(self, value):
+    def hydrate(self, value, session):
         return self.foreign_class.get(value)
         
     @property

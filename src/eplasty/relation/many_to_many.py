@@ -18,11 +18,15 @@ class ManyToMany(Column):
             self._prepare
             
     def bind(self, cls, name):
+        """After binding we must call _prepare"""
         self.owner_class = cls
         self.name = name
         self._prepare()
         
+        
     def _prepare(self): 
+        """This method is called when relation is ready to create it's
+        PrimaryTable"""
         if not self.foreign_class:
             self.foreign_class = self.owner_class
             
@@ -46,3 +50,19 @@ class ManyToMany(Column):
                 '__fk__': (self.owner_fk, self.foreign_fk),
             }
         )
+        
+    @classmethod
+    def get_raw(cls, value):
+        pass 
+    
+    def hydrate(self, value, session):
+        for it in value:
+            foreign_id = it.get_pk_value()[0]
+            self_id = self.get_pk_value()[0]
+            
+            new_prim = self.PrimaryTable(**{
+                self.owner_fk: self_id,
+                self.foreign_fk: foreign_id
+            })
+ 
+            self.add(new_prim)

@@ -17,6 +17,11 @@ class Table(object):
         if self._abstract:
             raise NotImplementedError, 'Abstract class'
         
+        self.columns = [c.get_row_bound(self) for c in type(self).columns]
+        self.inh_columns = [
+            c.get_row_bound(self) for c in type(self).inh_columns
+       ]
+        
         col_names = [
             col.name for col in it.chain(self.columns, self.inh_columns)
         ]
@@ -141,7 +146,7 @@ Flush this object to database using given cursor
         cursor.execute(*cls._get_query(condition))
         
         if cursor.rowcount == 1:
-            r = cls.hydrate(cursor.fetchone())
+            r = cls.hydrate(cursor.fetchone(), session)
             session.add(r)
             return r
         elif cursor.rowcount == 0:
@@ -161,15 +166,15 @@ Flush this object to database using given cursor
         cursor = session.cursor(query_hash)
         cursor.execute(*query)
         
-        return Result(cursor, cls)
+        return Result(session, cursor, cls)
         
     @classmethod
-    def hydrate(cls, tup):
+    def hydrate(cls, tup, session):
         """Hydrates the object from given tuple"""
         self = cls.__new__(cls)
         dict_ = dict()
         for col, v in zip(cls.columns, tup):
-            dict_[col.name] = col.hydrate(v)
+            dict_[col.name] = col.hydrate(v, session)
         
         self._initial = dict_.copy()
         self._current = dict_.copy()
