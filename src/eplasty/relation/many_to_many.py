@@ -51,12 +51,8 @@ class ManyToMany(Column):
             }
         )
         
-    @classmethod
-    def get_raw(cls, value):
-        pass 
-    
-    def hydrate(self, value, session):
-        for it in value:
+    def get_raw(self, session):
+        for it in self.__get__(self, type(self)):
             foreign_id = it.get_pk_value()[0]
             self_id = self.get_pk_value()[0]
             
@@ -65,4 +61,7 @@ class ManyToMany(Column):
                 self.foreign_fk: foreign_id
             })
  
-            self.add(new_prim)
+            session.add(new_prim)
+    
+    def hydrate(self, value, session):
+        pass 

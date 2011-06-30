@@ -41,7 +41,7 @@ and are able to flush them to database
                     queue.append(o)
                     continue
                 try:
-                    o.flush(cursor)
+                    o.flush(self, cursor)
                     o._flushed = True
                 except ProgrammingError as e:
                     if e.pgcode == '42P01': # Table doesn't exist

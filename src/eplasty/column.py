@@ -82,11 +82,10 @@ class Column(object):
         """Transform raw value from database to object version"""
         return value
     
-    @classmethod
-    def get_raw(cls, value):
+    def get_raw(self, value):
         """Get the value as it will appear in the database
         """
-        return value
+        return self.__get__(self.owner, type(self.owner))
     
     @classmethod
     def get_dependencies(self, value):

@@ -36,9 +36,8 @@ class ManyToOne(Column):
             on_delete = self.on_delete,
         )
         
-    @classmethod
-    def get_raw(cls, value):
-        return value.get_pk_value()
+    def get_raw(self, session):
+        return self.__get__(self.owner, type(self.owner)).get_pk_value()
     
     @classmethod
     def get_dependencies(self, value):

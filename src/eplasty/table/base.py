@@ -46,13 +46,13 @@ class Table(object):
                 
         return r
     
-    def _flush_new(self, cursor):
+    def _flush_new(self, session, cursor):
         col_names = []
         col_values = []
         for col in it.chain(self.columns, self.inh_columns):
             if col.name in self._current:
                 col_names.append(col.name)
-                col_values.append(type(col).get_raw(self._current[col.name]))
+                col_values.append(col.get_raw(session))
         cursor.execute(
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),
@@ -68,14 +68,14 @@ class Table(object):
             
         self._initial = self._current.copy()
             
-    def _flush_modified(self, cursor):
+    def _flush_modified(self, session, cursor):
         diff = self._diff
         col_names = []
         col_values = []
         
         for col, (was, is_) in diff: #@UnusedVariable
             col_names.append('{0} = %s'.format(col.name))
-            col_values.append(type(col).get_raw(is_))
+            col_values.append(col.get_raw(session))
             
         pk = self._current['id']
         col_names = ', '.join(col_names)
@@ -86,14 +86,14 @@ class Table(object):
             ), col_values + [pk]
         )
     
-    def flush(self, cursor):
+    def flush(self, session, cursor):
         """
 Flush this object to database using given cursor
         """
         if self._status == NEW:
-            self._flush_new(cursor)
+            self._flush_new(session, cursor)
         elif self._status == MODIFIED:
-            self._flush_modified(cursor)
+            self._flush_modified(session, cursor)
             
     
     @classmethod
