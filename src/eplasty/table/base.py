@@ -26,16 +26,15 @@ class Table(object):
             col.name for col in it.chain(self.columns, self.inh_columns)
         ]
         self._current = dict()
+        self._status = NEW
+        self._flushed = False
         for k, v in kwargs.iteritems():
             if k not in col_names:
                 raise TypeError, 'Class {0} has no attribute {1}'.format(
                     type(self).__name__, k
                 )
-            self._current[k] = v
-            
-        self._status = NEW
-        self._flushed = False
-        
+            setattr(self, k, v)
+
     @property
     def _diff(self):
         r = []
@@ -51,8 +50,9 @@ class Table(object):
         col_values = []
         for col in it.chain(self.columns, self.inh_columns):
             if col.name in self._current:
-                col_names.append(col.name)
-                col_values.append(col.get_raw(session))
+                if not col.pseudo:
+                    col_names.append(col.name)
+                    col_values.append(col.get_raw(session))
         cursor.execute(
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),

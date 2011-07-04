@@ -1,11 +1,15 @@
 from psycopg2 import ProgrammingError
+from psycopg2.errorcodes import UNDEFINED_TABLE
+
 from eplasty.util import queue_iterator
+
+
 class Session(object):
     """
 The sessions are orm wrappers of connections. They store the objects
 and are able to flush them to database
     """
-    
+
     def __init__(self, connection):
         self.connection = connection
         self.objects = []
@@ -17,20 +21,21 @@ and are able to flush them to database
         self.connection.rollback()
         for o in self.objects:
             o._flushed = False
-        
+
     def cursor(self, *args, **kwargs):
         return self.connection.cursor(*args, **kwargs)
-    
-    def add(self, o):
-        self.objects.append(o)
-        pk = o.get_pk_value()
-        if pk:
-            self.pk_objects.setdefault(type(o).__table_name__, {})
-            self.pk_objects[type(o).__table_name__][pk] = o
-        else:
-            self.nopk_objects.setdefault(type(o).__table_name__, [])
-            self.nopk_objects[type(o).__table_name__].append(o)
-        
+
+    def add(self, *os):
+        for o in os:
+            self.objects.append(o)
+            pk = o.get_pk_value()
+            if pk:
+                self.pk_objects.setdefault(type(o).__table_name__, {})
+                self.pk_objects[type(o).__table_name__][pk] = o
+            else:
+                self.nopk_objects.setdefault(type(o).__table_name__, [])
+                self.nopk_objects[type(o).__table_name__].append(o)
+
     def flush(self):
         from eplasty.table.const import NEW, MODIFIED, UPDATED, UNCHANGED
         cursor = self.cursor()
@@ -44,7 +49,7 @@ and are able to flush them to database
                     o.flush(self, cursor)
                     o._flushed = True
                 except ProgrammingError as e:
-                    if e.pgcode == '42P01': # Table doesn't exist
+                    if e.pgcode == UNDEFINED_TABLE:
                         cursor.connection.commit()
                         type(o).create_table(cursor)
                         self._rollback()
@@ -52,19 +57,19 @@ and are able to flush them to database
                         return
                     else:
                         raise
-                    
+
         self.connection.commit()
         for o in self.objects:
             if o._flushed:
                 o._status = UNCHANGED
                 o._flushed = False
-                
+
         for tname, collection in self.nopk_objects.iteritems():
             self.pk_objects.setdefault(tname, {})
             for o in collection:
                 self.pk_objects[tname][o.get_pk_value()] = o
             del collection[:]
-            
+
     def find_cached(self, table_name, pk_value):
         if not isinstance (pk_value, tuple):
             pk_value = pk_value,
@@ -72,10 +77,8 @@ and are able to flush them to database
             return self.pk_objects[table_name][pk_value]
         except KeyError:
             return None
-            
-                    
-        
+
     def commit(self):
         self.flush()
         self.connection.commit()
-        
+

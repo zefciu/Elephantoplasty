@@ -13,6 +13,8 @@ Philosophy
    The ORM should guess all the obvious things, but allow to override them.
 #. Where possible use pythonic EAFP strategy. If database seems to be not
    in sync with ORM try to migrate.
+#. The interaction with persistent objects should be as seamless and 
+   pythonic as possible
 
 DONE
 -----------------
@@ -31,3 +33,4 @@ TODO
 #. Concurrency control
 #. Conflict detection
 #. Advanced identities
+#. List-like and dict-like relations

@@ -1,6 +1,10 @@
+from psycopg2 import ProgrammingError
+
 from eplasty.column import BigSerial, Column
+from eplasty.relation import Relation 
 from eplasty.util import clsname2tname
 from eplasty.ctx import get_cursor
+from psycopg2.errorcodes import UNDEFINED_TABLE
 
 class TableMeta(type):
     """Metaclass for table types"""
@@ -39,7 +43,8 @@ selecting a table name"""
         dict_.pop('__pk__', None)
             
         cls.columns = columns
-        
+
+
         if '__table_name__' in dict_:
             cls.__table_name__ = dict_['__table_name__']
         else:
@@ -47,12 +52,17 @@ selecting a table name"""
             
         dict_.pop('__table_name__', None)
 
+        for c in cls.columns:
+            if isinstance(c, Relation):
+                c.prepare()
+
     def create_table(cls, ctx = None): #@NoSelf
         cursor = get_cursor(ctx)
         column_decls = []
         constraints = []
         for c in cls.columns:
-            column_decls.append(c.declaration) 
+            if c.declaration:
+                column_decls.append(c.declaration) 
             if c.constraint:
                 constraints.append(c.constraint)
         constraints.append('PRIMARY KEY ({0})'.format(','.join(cls.__pk__)))
@@ -69,6 +79,17 @@ selecting a table name"""
                 )) if cls.parent_classes else ''
             )
         )
-        
-        cursor.execute(command)
+        retried = False
+        while True:
+            try:
+                cursor.execute(command)
+                break
+            except ProgrammingError as e:
+                cursor.connection.rollback()
+                if e.pgcode == UNDEFINED_TABLE and not retried:
+                    for col in cls.columns:
+                        if hasattr(col, 'foreign_class'):
+                            col.foreign_class.create_table()
+                            retried = True
+
         cursor.connection.commit()

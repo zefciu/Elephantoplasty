@@ -2,60 +2,61 @@ import unittest
 
 from psycopg2 import ProgrammingError
 
-from eplasty.table.base import Table
-from eplasty.column import CharacterVarying
-from eplasty.relation import ManyToOne
-from test.util import get_test_conn
-from eplasty.ctx import set_context, start_session, add, commit
+from util import get_test_conn
+import eplasty as ep
 
 
 class Test(unittest.TestCase):
-    """Basic tests for one-to-many relationships"""
+    """Basic test for one-to-many relation"""
+
 
     def setUp(self):
-        
-        class Movie(Table):
-            title = CharacterVarying(30)
-            
-        class Character(Table):
-            name = CharacterVarying(30)
-            movie = ManyToOne(Movie)
-        
         self.connection = get_test_conn()
-        set_context(self.connection)
-        start_session()
-        life = Movie(title = 'Life of Brian')
-        grail = Movie(title = 'MP & the Holy Grail')
-        for c in [
-            ('Brain', life),
-            ('Patsy', grail),
-            ('Arthur', grail),
+        ep.set_context(self.connection)
+        ep.start_session()
+
+        class Ingredient(ep.Table):
+            name = ep.col.CharacterVarying(20)
+
+        class Meal(ep.Table):
+            name = ep.col.CharacterVarying(20)
+            ingredients = ep.rel.OneToMany(Ingredient)
+
+        for meal_name, ingredient_set in [
+            ('meal1', ['spam', 'bacon']),
+            ('meal2', ['spam', 'eggs', 'bacon']),
+            ('meal3', ['spam', 'bacon', 'sausage']),
         ]:
-            name, movie = c
-            char = Character(name = name, movie = movie)
-            add(char)
-            
-        add(life)
-        add(grail)
-        commit()
-        
-        self.Character = Character
-        self.Movie = Movie
+            ingredients = [
+                Ingredient(name = ing) for ing in ingredient_set
+            ]
+            ep.add(*ingredients)
+            new_meal = Meal(name = meal_name, ingredients = ingredients)
+            ep.add(new_meal)
+
+        ep.commit()
+
+        self.Ingredient = Ingredient
+        self.Meal = Meal
 
 
     def tearDown(self):
         cur = self.connection.cursor()
         try:
-            cur.execute('DROP TABLE characters;')
-            cur.execute('DROP TABLE movies;')
+            cur.execute('DROP TABLE ingredients;')
+            cur.execute('DROP TABLE meals;')
             self.connection.commit()
         except ProgrammingError:
             pass
-            
 
-    def test_get(self):
-        c = self.Character.get(name = 'Patsy')
-        self.assertEqual(c.movie.title, 'MP & the Holy Grail')
+
+    def test_get_one(self):
+        """Test if a single object gets correct set of children"""
+        meal = self.Meal.get(1)
+        self.assertEqual(
+            set([i.name for i in meal.ingredients]),
+            set(['spam', 'bacon'])
+        )
 
 
 if __name__ == "__main__":

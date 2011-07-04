@@ -1,11 +1,11 @@
 import eplasty as ep
-from eplasty.column import Column
+from base import Relation
 from eplasty.util import clsname2tname, clsname2kname
 from eplasty.table.meta import TableMeta
 from eplasty.relation.many_to_one import ManyToOne
 # from eplasty import relation as r
 
-class ManyToMany(Column):
+class ManyToMany(Relation):
     
     def __init__(self, foreign_class = None, backref = None):
         
@@ -18,13 +18,11 @@ class ManyToMany(Column):
             self._prepare
             
     def bind(self, cls, name):
-        """After binding we must call _prepare"""
         self.owner_class = cls
         self.name = name
-        self._prepare()
-        
-        
-    def _prepare(self): 
+
+
+    def prepare(self): 
         """This method is called when relation is ready to create it's
         PrimaryTable"""
         if not self.foreign_class:

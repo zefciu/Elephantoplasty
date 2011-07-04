@@ -1,8 +1,8 @@
-from eplasty.column import Column
 from const import NO_ACTION
+from base import Relation
 
 
-class ManyToOne(Column):
+class ManyToOne(Relation):
     """Many-to-one relationship on the 'many' side"""
     
     def __init__(
@@ -23,7 +23,7 @@ class ManyToOne(Column):
         self.attrs.append(foreign_class)
         
     def hydrate(self, value, session):
-        return self.foreign_class.get(value)
+        return self.foreign_class.get(value, session = session)
         
     @property
     def constraint(self):

@@ -50,3 +50,16 @@ class queue_iterator(object):
             return self.list_.pop(0)
         except IndexError:
             raise StopIteration
+
+def diff_unsorted(prev, curr):
+    deleted = []
+    added = []
+    for o in prev:
+        if o not in curr:
+            deleted.append(o)
+            
+    for o in curr:
+        if o not in prev:
+            added.append(o)
+    
+    return added, deleted
