@@ -52,6 +52,7 @@ class Test(unittest.TestCase):
 
     def test_get_one(self):
         """Test if a single object gets correct set of children"""
+        ep.start_session()
         meal = self.Meal.get(1)
         self.assertEqual(
             set([i.name for i in meal.ingredients]),

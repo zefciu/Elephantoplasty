@@ -14,7 +14,7 @@ class Ctx(object):
         self.connection = connection
         self.cursor = cursor
         self.session = session
-        
+     
 ctx = Ctx()
 
 def connect(*args, **kwargs):
@@ -96,6 +96,8 @@ def del_context():
 def start_session():
     """Start the session in global context"""
     global ctx
+    if ctx.session:
+        ctx.session.close()
     ctx.session = Session(get_connection())
     
 def commit():

@@ -17,15 +17,10 @@ class Table(object):
         if self._abstract:
             raise NotImplementedError, 'Abstract class'
         
-        self.columns = [c.get_row_bound(self) for c in type(self).columns]
-        self.inh_columns = [
-            c.get_row_bound(self) for c in type(self).inh_columns
-       ]
         
         col_names = [
             col.name for col in it.chain(self.columns, self.inh_columns)
         ]
-        self._current = dict()
         self._status = NEW
         self._flushed = False
         for k, v in kwargs.iteritems():
@@ -34,6 +29,15 @@ class Table(object):
                     type(self).__name__, k
                 )
             setattr(self, k, v)
+            
+            
+    def __new__(cls, *args, **kwargs):
+        self = super(Table, cls).__new__(cls)
+        self.columns = [c.get_row_bound(self) for c in cls.columns]
+        self.inh_columns = [c.get_row_bound(self) for c in cls.inh_columns]
+        self._current = {}
+        self._initial = {}
+        return self
 
     @property
     def _diff(self):
@@ -101,7 +105,7 @@ Flush this object to database using given cursor
         """Returns column names as a comma separated string to be used in
         SQL queries"""
         columns = it.chain(cls.columns, cls.inh_columns) if all else cls.columns
-        return ','.join((c.name for c in columns))
+        return ','.join((c.name for c in columns if not c.pseudo))
     
     @classmethod
     def _get_conditions(cls, *args, **kwargs):
@@ -163,7 +167,7 @@ Flush this object to database using given cursor
         
         query = cls._get_query(condition)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
-        cursor = session.cursor(query_hash)
+        cursor = session.cursor()
         cursor.execute(*query)
         
         return Result(session, cursor, cls)
@@ -172,12 +176,14 @@ Flush this object to database using given cursor
     def hydrate(cls, tup, session):
         """Hydrates the object from given tuple"""
         self = cls.__new__(cls)
-        dict_ = dict()
-        for col, v in zip(cls.columns, tup):
-            dict_[col.name] = col.hydrate(v, session)
+        lst = list(tup)
+        for col in self.columns:
+            if col.pseudo:
+                self._current[col.name] = col.hydrate(session)
+            else:
+                self._current[col.name] = col.hydrate(lst.pop(0), session)
         
-        self._initial = dict_.copy()
-        self._current = dict_.copy()
+        self._initial = self._current.copy()
         self._status = UNCHANGED
         self._flushed = False
             

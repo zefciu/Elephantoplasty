@@ -1,4 +1,4 @@
-from psycopg2 import ProgrammingError
+from psycopg2 import ProgrammingError, InterfaceError
 from psycopg2.errorcodes import UNDEFINED_TABLE
 
 from eplasty.util import queue_iterator
@@ -12,18 +12,31 @@ and are able to flush them to database
 
     def __init__(self, connection):
         self.connection = connection
+        self.cursors = []
         self.objects = []
         self.nopk_objects = {}
         self.pk_objects = {}
-        
+
+    def __del__(self):
+        self.close()
+
     def _rollback(self):
         """Rollback the connection and unset ``flushed`` flags"""
         self.connection.rollback()
         for o in self.objects:
             o._flushed = False
 
+    def close(self):
+        for c in self.cursors:
+            try:
+                c.close()
+            except InterfaceError:
+                pass
+
     def cursor(self, *args, **kwargs):
-        return self.connection.cursor(*args, **kwargs)
+        new_cur = self.connection.cursor(*args, **kwargs)
+        self.cursors.append(new_cur)
+        return new_cur
 
     def add(self, *os):
         for o in os:

@@ -1,29 +1,31 @@
+import itertools as it
+
 from psycopg2 import ProgrammingError
 
-from eplasty.column import BigSerial, Column
+from eplasty.field import Field
 from eplasty.relation import Relation 
 from eplasty.util import clsname2tname
 from eplasty.ctx import get_cursor
 from psycopg2.errorcodes import UNDEFINED_TABLE
 
 class TableMeta(type):
-    """Metaclass for table types"""
+    """Metaclass for Object types"""
     
     def __init__(cls, classname, bases, dict_):
-        columns = [
-            c.bind(cls, n)
-            for n, c in dict_.iteritems() if isinstance(c, Column)
+        fields = [
+            f.bind(cls, n)
+            for n, f in dict_.iteritems() if isinstance(f, Field)
         ]
-        
-        if not columns:
+
+        if not fields:
             cls._abstract = True
         else:
             cls._abstract = False
-            cls._setup_non_abstract(classname, bases, dict_, columns)
+            cls._setup_non_abstract(classname, bases, dict_, fields)
         
         super(TableMeta, cls).__init__(classname, bases, dict_)
         
-    def _setup_non_abstract(cls, classname, bases, dict_, columns): #@NoSelf
+    def _setup_non_abstract(cls, classname, bases, dict_, fields): #@NoSelf
         """Setups the non-abstract class creating primary key if needed and
 selecting a table name"""
 
@@ -36,13 +38,15 @@ selecting a table name"""
             if cls.parent_classes: 
                 dict_['__pk__'] = cls.parent_classes[0].__pk__
             else:
-                columns.insert(0, BigSerial('id'))
+                pk = SimplePK('id')
+                fields.insert(0, pk)
+                dict_['id'] = pk
                 dict_['__pk__'] = ('id',)
-            
+
         cls.__pk__ = dict_['__pk__']
         dict_.pop('__pk__', None)
             
-        cls.columns = columns
+        cls.fields = fields
 
 
         if '__table_name__' in dict_:
@@ -52,19 +56,17 @@ selecting a table name"""
             
         dict_.pop('__table_name__', None)
 
-        for c in cls.columns:
-            if isinstance(c, Relation):
-                c.prepare()
+        for f in cls.fields:
+            f.prepare()
 
     def create_table(cls, ctx = None): #@NoSelf
         cursor = get_cursor(ctx)
         column_decls = []
-        constraints = []
-        for c in cls.columns:
+        columns = it.chain(*[f.columns for f in cls.fields])
+        constraints = it.chain(*[f.constraints for f in cls.fields])
+        for c in columns:
             if c.declaration:
                 column_decls.append(c.declaration) 
-            if c.constraint:
-                constraints.append(c.constraint)
         constraints.append('PRIMARY KEY ({0})'.format(','.join(cls.__pk__)))
         command = """CREATE TABLE {tname}
         (
@@ -93,3 +95,8 @@ selecting a table name"""
                             retried = True
 
         cursor.connection.commit()
+        
+    def add_column(cls, name, column): #@NoSelf
+        column.bind(cls, name)
+        cls.columns.append(column)
+        setattr(cls, name, column)

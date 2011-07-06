@@ -1,5 +1,5 @@
 import unittest
-from eplasty import column as c
+from eplasty import field as f
 from eplasty.table import Table
 from eplasty.ctx import set_context, start_session, commit, add, get_connection
 from util import get_test_conn
@@ -13,12 +13,12 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
     def setUp(self):
         
         class Knight(Table):
-            title = c.CharacterVarying(
+            title = f.CharacterVarying(
                 length = 5, null = False, default = 'Sir'
             )
-            name = c.CharacterVarying(length = 20, null = False)
-            nickname = c.CharacterVarying(length = 20, null = True)
-            score = c.Integer()
+            name = f.CharacterVarying(length = 20, null = False)
+            nickname = f.CharacterVarying(length = 20, null = True)
+            score = f.Integer()
             
         self.Knight = Knight
         set_context(get_test_conn())
@@ -64,8 +64,6 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         objects = knights2.fetch(10)
         self.assertEqual(len(objects), 4)
         knights2.cursor.close()
-        
-        
         
         
     def test_deft(self):

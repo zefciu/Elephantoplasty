@@ -25,6 +25,7 @@ class OneToMany(Relation):
         self.foreign_class = foreign_class
         self.backref = backref
         self.key_name = key_name
+        self.fmt = fmt
 
         super(OneToMany, self).__init__(**kwattrs)
         self.attrs.append(foreign_class)
@@ -39,6 +40,9 @@ class OneToMany(Relation):
     def bind(self, cls, name):
         self.owner_class = cls
         self.name = name
+        if not self.backref:
+            self.backref = self.name
+            self.kwattrs['backref'] = self.backref
         return self
 
     def prepare(self): 
@@ -51,9 +55,10 @@ class OneToMany(Relation):
         )
         
         if self.backref not in self.foreign_class.columns:
-            new_col = ManyToOne(name = self.backref, foreign_class = self.owner_class)
-            self.foreign_class.columns.append(new_col)
-            setattr(self.foreign_class, self.backref, new_col)
+            self.foreign_class.add_column(
+                self.backref,
+                ManyToOne(foreign_class = self.owner_class)
+            )
 
     def get_raw(self, session):
         pass
@@ -78,7 +83,8 @@ class OneToMany(Relation):
 
     def hydrate(self, session):
         res = self.foreign_class.find(
-            Equals(self.backref, self.owner.get_pk_value)
+            session,
+            Equals(self.backref, self.owner.get_pk_value())
         )
         if self.fmt == RESULT:
             return res

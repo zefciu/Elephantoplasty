@@ -1,8 +1,10 @@
 from psycopg2.extensions import adapt
 
-
 class Column(object):
-    """Base class for all columns. Columns are descriptors."""
+    """
+    Columns are lower level than fields. They represent 1:1 the columns
+    of underlying database table
+    """
     __slots__ = [
         'name', 'pgtype', 'length', 'attrs', 'constraint', 'owner_class',
         'owner', 'pseudo', 'compat_types'
@@ -44,7 +46,7 @@ class Column(object):
                 return True
         return False
 
-    def __set__(self, inst, v):
+    def _set_value(self, v, inst, cls):
         from eplasty.table.const import MODIFIED, UNCHANGED, UPDATED
         if not self._is_compatible(v):
             raise TypeError, ('Python type {0} is not compatible with column'
@@ -53,7 +55,7 @@ class Column(object):
         if inst._status in [UNCHANGED, UPDATED]:
             inst._status = MODIFIED
         
-    def __get__(self, inst, cls):
+    def _get_value(self, inst, cls):
         return inst._current[self.name]
 
     @property
@@ -80,8 +82,6 @@ class Column(object):
         copy.owner_class = self.owner_class
         copy.name = self.name
         return copy
-        
-        
 
     def hydrate(self, value, session):
         """Transform raw value from database to object version"""
@@ -96,7 +96,6 @@ class Column(object):
     def get_dependencies(self, value):
         """Get a list of objects that should be flushed before this one"""
         return []
-
 
 
 class BigSerial(Column):
