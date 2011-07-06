@@ -18,13 +18,13 @@ class Table(object):
             raise NotImplementedError, 'Abstract class'
         
         
-        col_names = [
-            col.name for col in it.chain(self.columns, self.inh_columns)
+        field_names = [
+            field.name for field in it.chain(self.fields)
         ]
         self._status = NEW
         self._flushed = False
         for k, v in kwargs.iteritems():
-            if k not in col_names:
+            if k not in field_names:
                 raise TypeError, 'Class {0} has no attribute {1}'.format(
                     type(self).__name__, k
                 )
@@ -33,8 +33,8 @@ class Table(object):
             
     def __new__(cls, *args, **kwargs):
         self = super(Table, cls).__new__(cls)
-        self.columns = [c.get_row_bound(self) for c in cls.columns]
-        self.inh_columns = [c.get_row_bound(self) for c in cls.inh_columns]
+        self.fields = [f.bind_object(self) for f in cls.fields]
+        #self.inh_columns = [c.get_row_bound(self) for c in cls.inh_columns]
         self._current = {}
         self._initial = {}
         return self
@@ -52,9 +52,10 @@ class Table(object):
     def _flush_new(self, session, cursor):
         col_names = []
         col_values = []
-        for col in it.chain(self.columns, self.inh_columns):
-            if col.name in self._current:
-                if not col.pseudo:
+        for f in it.chain(self.fields):
+            f.sync_down()
+            for col in f.columns:
+                if col.name in self._current:
                     col_names.append(col.name)
                     col_values.append(col.get_raw(session))
         cursor.execute(
@@ -204,10 +205,11 @@ Flush this object to database using given cursor
     def _has_unflushed_dependencies(self):
         """Tells if there are some objects that should be flushed before this
         one"""
-        result = []
-        for c in self.columns:
-            if c.name in self._current:
-                for d in type(c).get_dependencies(self._current[c.name]):
-                    if d._status == 'NEW' and not d._flushed:
-                        result.append(d)
-        return result or False
+        return False
+#        result = []
+#        for c in self.columns:
+#            if c.name in self._current:
+#                for d in type(c).get_dependencies(self._current[c.name]):
+#                    if d._status == 'NEW' and not d._flushed:
+#                        result.append(d)
+#        return result or False

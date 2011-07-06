@@ -13,7 +13,7 @@ class Column(object):
     constraint = None
     pseudo = False
 
-    def __init__(self, name = None, length = None, null= True, default = False):
+    def __init__(self, name = None, length = None, null= True, default = False, **kwargs):
         self.name = name
         self.length = length
         self.null = null

@@ -9,15 +9,21 @@ class Simple(Field):
 
     ColumnType = None
 
-    def __init__(self, *args, **kwargs):
-        self.column = self.ColumnType(name = self.name, *args, **kwargs)
+    def __init__(self, name=None, *args, **kwargs):
+        self.name = name
+        self.column = self.ColumnType(name=name, *args, **kwargs)
         self.columns = [self.column]
+        super(Simple, self).__init__(name, *args, **kwargs)
 
     def _get_value(self, inst, cls):
         return self.column._get_value(self, inst, cls)
 
     def sync_down(self):
-        self.columns._set_value(self, self._value, self.owner, self.owner_class)
+        self.column._set_value(self, self.value, self.owner, self.owner_class)
+
+    def bind_class(self, cls, name):
+        self.column.name = name
+        return super(Simple, self).bind_class(cls, name)
 
 
 class Integer(Simple):

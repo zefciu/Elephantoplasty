@@ -7,13 +7,14 @@ from eplasty.relation import Relation
 from eplasty.util import clsname2tname
 from eplasty.ctx import get_cursor
 from psycopg2.errorcodes import UNDEFINED_TABLE
+from eplasty.field import SimplePK
 
 class TableMeta(type):
     """Metaclass for Object types"""
     
     def __init__(cls, classname, bases, dict_):
         fields = [
-            f.bind(cls, n)
+            f.bind_class(cls, n)
             for n, f in dict_.iteritems() if isinstance(f, Field)
         ]
 
