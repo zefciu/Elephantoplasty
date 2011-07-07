@@ -64,7 +64,7 @@ selecting a table name"""
         cursor = get_cursor(ctx)
         column_decls = []
         columns = it.chain(*[f.columns for f in cls.fields])
-        constraints = it.chain(*[f.constraints for f in cls.fields])
+        constraints = sum([f.constraints for f in cls.fields], [])
         for c in columns:
             if c.declaration:
                 column_decls.append(c.declaration) 

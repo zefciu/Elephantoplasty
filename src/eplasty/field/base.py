@@ -8,19 +8,21 @@ class Field(object):
 
     def __init__(self, *args, **kwargs):
         self.kwargs = kwargs
-        self.owner = None
         if 'default' in kwargs:
             self._default = kwargs['default']
 
     def __get__(self, inst, cls):
-        if self._value:
-            return self._value
-        else:
-            self._get_value(self, inst, cls)
+        try:
+            inst._current.get(self.name, self._default)
+        except KeyError:
+            raise AttributeError, ('The field {0} is neither set nor'
+                'has default value'.format(
+                    self.name
+                ))
 
     def __set__(self, inst, v):
-        self._value = v
-        
+        inst._current[self.name] = v
+
     @property
     def value(self):
         if hasattr(self, '_value'):
@@ -31,6 +33,8 @@ class Field(object):
             raise AttributeError,\
                 'Field {0} has neither set nor default value'.format(self.name)
         
+    def get_c_vals(self, dict_):
+        return {}
 
 
     def bind_class(self, cls, name):
@@ -39,11 +43,6 @@ class Field(object):
         self.kwargs['owner_class'] = cls
         self.kwargs['name'] = name
         return self
-
-    def bind_object(self, o):
-        copy = type(self)(**self.kwargs)
-        copy.owner = o
-        return copy
 
     constraints = []
 

@@ -30,11 +30,8 @@ class Table(object):
                 )
             setattr(self, k, v)
             
-            
     def __new__(cls, *args, **kwargs):
         self = super(Table, cls).__new__(cls)
-        self.fields = [f.bind_object(self) for f in cls.fields]
-        #self.inh_columns = [c.get_row_bound(self) for c in cls.inh_columns]
         self._current = {}
         self._initial = {}
         return self
@@ -53,11 +50,10 @@ class Table(object):
         col_names = []
         col_values = []
         for f in it.chain(self.fields):
-            f.sync_down()
-            for col in f.columns:
-                if col.name in self._current:
-                    col_names.append(col.name)
-                    col_values.append(col.get_raw(session))
+            cvals = f.get_c_vals(self._current)
+            for cname, cval in cvals.iteritems():
+                col_names.append(cname)
+                col_values.append(cval)
         cursor.execute(
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),

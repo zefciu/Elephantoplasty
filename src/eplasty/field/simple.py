@@ -6,6 +6,7 @@ from base import Field
 from eplasty import column as c
 
 class Simple(Field):
+    """Basic, abstract class for all simple fields"""
 
     ColumnType = None
 
@@ -18,8 +19,9 @@ class Simple(Field):
     def _get_value(self, inst, cls):
         return self.column._get_value(self, inst, cls)
 
-    def sync_down(self):
-        self.column._set_value(self, self.value, self.owner, self.owner_class)
+    def get_c_vals(self, dict_):
+        """Gets a mapping of column_name -> column_value for this field"""
+        return {self.column.name: dict_[self.name]}
 
     def bind_class(self, cls, name):
         self.column.name = name
