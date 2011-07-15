@@ -13,15 +13,26 @@ class Field(object):
 
     def __get__(self, inst, cls):
         try:
-            inst._current.get(self.name, self._default)
+            return inst._current[self.name]
         except KeyError:
-            raise AttributeError, ('The field {0} is neither set nor'
-                'has default value'.format(
-                    self.name
-                ))
+            try:
+                return self._default
+            except AttributeError:
+                raise AttributeError, ('The field {0} is neither set nor '
+                    'has default value'.format(
+                        self.name
+                    ))
 
     def __set__(self, inst, v):
-        inst._current[self.name] = v
+        if self._is_compatible(v):
+            inst._current[self.name] = v
+        else:
+            raise TypeError('Type {0} is incompatible with field {1}'.format(
+                type(v), type(self)
+            ))
+            
+    def _is_compatible(self, v):
+        return True
 
     @property
     def value(self):

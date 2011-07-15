@@ -21,11 +21,17 @@ class Simple(Field):
 
     def get_c_vals(self, dict_):
         """Gets a mapping of column_name -> column_value for this field"""
-        return {self.column.name: dict_[self.name]}
+        if self.name in dict_:
+            return {self.column.name: dict_[self.name]}
+        else:
+            return {}
 
     def bind_class(self, cls, name):
         self.column.name = name
         return super(Simple, self).bind_class(cls, name)
+    
+    def _is_compatible(self, v):
+        return self.column._is_compatible(v)
 
 
 class Integer(Simple):

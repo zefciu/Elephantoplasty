@@ -3,7 +3,7 @@ import itertools as it
 from psycopg2 import ProgrammingError
 
 from eplasty.field import Field
-from eplasty.relation import Relation 
+# from eplasty.relation import Relation 
 from eplasty.util import clsname2tname
 from eplasty.ctx import get_cursor
 from psycopg2.errorcodes import UNDEFINED_TABLE
@@ -30,6 +30,7 @@ class TableMeta(type):
         """Setups the non-abstract class creating primary key if needed and
 selecting a table name"""
 
+        cls.columns = sum((f.columns for f in fields), [])
         cls.parent_classes = [b for b in bases if not b._abstract]
         cls.inh_columns = sum([
             p_cls.columns for p_cls in cls.parent_classes

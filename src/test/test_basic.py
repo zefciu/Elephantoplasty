@@ -43,7 +43,6 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         commit()
  
     def tearDown(self):
-        import pdb; pdb.set_trace()
         c = get_connection()
         c.cursor().execute('DROP TABLE knights;')
         c.commit()
