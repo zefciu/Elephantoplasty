@@ -19,7 +19,7 @@ class Table(object):
         
         
         field_names = [
-            field.name for field in it.chain(self.fields)
+            field.name for field in it.chain(self.fields, self.inh_fields)
         ]
         self._status = NEW
         self._flushed = False
@@ -49,7 +49,7 @@ class Table(object):
     def _flush_new(self, session, cursor):
         col_names = []
         col_values = []
-        for f in it.chain(self.fields):
+        for f in it.chain(self.fields, self.inh_fields):
             cvals = f.get_c_vals(self._current)
             for cname, cval in cvals.iteritems():
                 col_names.append(cname)

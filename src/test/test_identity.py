@@ -1,6 +1,7 @@
 import unittest
 
 import eplasty as ep
+from eplasty import field as f
 from util import get_test_conn
 
 
@@ -9,12 +10,12 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         class Knight(ep.Table):
-            title = ep.col.CharacterVarying(
+            title = f.CharacterVarying(
                 length = 5, null = False, default = 'Sir'
             )
-            name = ep.col.CharacterVarying(length = 20, null = False)
-            nickname = ep.col.CharacterVarying(length = 20, null = True)
-            score = ep.col.Integer()
+            name = f.CharacterVarying(length = 20, null = False)
+            nickname = f.CharacterVarying(length = 20, null = True)
+            score = f.Integer()
             
         self.Knight = Knight
         ep.set_context(get_test_conn())

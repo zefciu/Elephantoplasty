@@ -35,6 +35,9 @@ selecting a table name"""
         cls.inh_columns = sum([
             p_cls.columns for p_cls in cls.parent_classes
         ], [])
+        cls.inh_fields = sum([
+            p_cls.fields for p_cls in cls.parent_classes
+        ], [])
             
         if '__pk__' not in dict_:
             if cls.parent_classes: 

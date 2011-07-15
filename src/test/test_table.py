@@ -1,6 +1,6 @@
 import unittest
 from eplasty.table.base import Table
-from eplasty.column import CharacterVarying
+from eplasty import field as f
 from eplasty.ctx import get_connection, set_context, start_session, add, commit
 from util import get_test_conn
 
@@ -22,7 +22,7 @@ class Test(unittest.TestCase):
         """Creating a table with custom table_name"""
         class Spam(Table):
             __table_name__ = 'eggs'
-            meal = CharacterVarying(length = 10)
+            meal = f.CharacterVarying(length = 10)
             
         add(Spam(meal = 'bacon'))
         commit()

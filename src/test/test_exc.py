@@ -7,7 +7,7 @@ from psycopg2 import ProgrammingError
 
 from eplasty.table import Table
 from eplasty.conditions import Condition
-from eplasty.column import CharacterVarying
+from eplasty.field import CharacterVarying
 from eplasty.ctx import set_context, add, commit, start_session
 from test.util import get_test_conn
 
