@@ -107,6 +107,7 @@ selecting a table name"""
         cls.fields.append(field)
         cls.columns += field.columns
         setattr(cls, name, field)
+        return field
 
     def hydrate(cls, tup, session): #@NoSelf
         """Hydrates the object from given tuple"""

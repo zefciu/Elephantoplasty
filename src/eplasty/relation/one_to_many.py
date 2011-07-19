@@ -46,7 +46,7 @@ class OneToMany(Relation):
         )
         
         if self.backref not in (f.name for f in self.foreign_class.fields):
-            self.foreign_class.add_field(
+            self.foreign_field = self.foreign_class.add_field(
                 self.backref,
                 ManyToOne(foreign_class = self.owner_class)
             )
@@ -74,5 +74,5 @@ class OneToMany(Relation):
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = LazyQuery(
             self.foreign_class, 'find', session,
-            Equals(self.backref + '_id', inst.get_pk_value())
+            Equals(self.foreign_field.column.name, inst.get_pk_value())
         )
