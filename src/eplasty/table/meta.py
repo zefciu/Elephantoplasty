@@ -102,10 +102,11 @@ selecting a table name"""
 
         cursor.connection.commit()
 
-    def add_column(cls, name, column): #@NoSelf
-        column.bind(cls, name)
-        cls.columns.append(column)
-        setattr(cls, name, column)
+    def add_field(cls, name, field): #@NoSelf
+        field.bind_class(cls, name)
+        cls.fields.append(field)
+        cls.columns += field.columns
+        setattr(cls, name, field)
 
     def hydrate(cls, tup, session): #@NoSelf
         """Hydrates the object from given tuple"""

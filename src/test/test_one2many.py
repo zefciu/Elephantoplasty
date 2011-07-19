@@ -16,10 +16,10 @@ class Test(unittest.TestCase):
         ep.start_session()
 
         class Ingredient(ep.Table):
-            name = ep.col.CharacterVarying(20)
+            name = ep.f.CharacterVarying(20)
 
         class Meal(ep.Table):
-            name = ep.col.CharacterVarying(20)
+            name = ep.f.CharacterVarying(20)
             ingredients = ep.rel.OneToMany(Ingredient)
 
         for meal_name, ingredient_set in [
