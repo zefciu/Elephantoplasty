@@ -24,15 +24,18 @@ class Field(object):
                     ))
 
     def __set__(self, inst, v):
-        if self._is_compatible(v):
-            inst._current[self.name] = v
-        else:
-            raise TypeError('Type {0} is incompatible with field {1}'.format(
-                type(v), type(self)
-            ))
-            
+        try:
+            if self._is_compatible(v):
+                inst._current[self.name] = v
+            else:
+                raise TypeError('Type {0} is incompatible with field {1}'.format(
+                    type(v), type(self)
+                ))
+        except NotImplementedError:
+            raise TypeError, self.RO_MESSAGE
+
     def _is_compatible(self, v):
-        return True
+        raise NotImplementedError
 
     @property
     def value(self):
@@ -59,3 +62,10 @@ class Field(object):
 
     def prepare(self):
         pass
+    
+    def get_dependencies(self, dict_):
+        """
+        Gets all the objects that should be flushed before the object
+        containing this field
+        """
+        return []

@@ -10,14 +10,17 @@ class Column(object):
         'owner', 'pseudo', 'compat_types'
     ]
 
-    constraint = None
     pseudo = False
 
-    def __init__(self, name = None, length = None, null= True, default = False, **kwargs):
+    def __init__(
+        self, name=None, length=None, null=True, default=False, constraint=None,
+        **kwargs
+    ):
         self.name = name
         self.length = length
         self.null = null
         self.default = default
+        self.constraint = constraint
         
         self.pgattrs = []
         

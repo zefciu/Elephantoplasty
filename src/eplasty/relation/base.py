@@ -1,6 +1,6 @@
-from eplasty.column import Column
+from eplasty.field import Field
 
-class Relation(Column):
+class Relation(Field):
     def prepare(self):
         """Prepare the relation. Called after owner class is almost ready"""
 

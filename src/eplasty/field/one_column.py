@@ -25,5 +25,5 @@ class OneColumn(Field):
         self.column.name = name
         return super(OneColumn, self).bind_class(cls, name)
 
-    def hydrate(self, inst, col_vals, dict_):
+    def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = col_vals[self.column.name]

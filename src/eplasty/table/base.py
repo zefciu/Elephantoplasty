@@ -169,22 +169,6 @@ Flush this object to database using given cursor
         
         return Result(session, cursor, cls)
         
-    @classmethod
-    def hydrate(cls, tup, session):
-        """Hydrates the object from given tuple"""
-        self = cls.__new__(cls)
-        lst = list(tup)
-        for col in self.columns:
-            if col.pseudo:
-                self._current[col.name] = col.hydrate(session)
-            else:
-                self._current[col.name] = col.hydrate(lst.pop(0), session)
-        
-        self._initial = self._current.copy()
-        self._status = UNCHANGED
-        self._flushed = False
-            
-        return self
     
     @classmethod
     def get_pk(cls):
@@ -201,11 +185,10 @@ Flush this object to database using given cursor
     def _has_unflushed_dependencies(self):
         """Tells if there are some objects that should be flushed before this
         one"""
-        return False
-#        result = []
-#        for c in self.columns:
-#            if c.name in self._current:
-#                for d in type(c).get_dependencies(self._current[c.name]):
-#                    if d._status == 'NEW' and not d._flushed:
-#                        result.append(d)
-#        return result or False
+        result = []
+        for f in self.fields:
+#           if f.name in self._current:
+            for d in f.get_dependencies(self._current):
+                if d._status == NEW and not d._flushed:
+                    result.append(d)
+        return result or False

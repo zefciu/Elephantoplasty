@@ -3,7 +3,7 @@ import unittest
 from psycopg2 import ProgrammingError
 
 from eplasty.table.base import Table
-from eplasty.column import CharacterVarying
+from eplasty.field import CharacterVarying
 from eplasty.relation import ManyToOne
 from test.util import get_test_conn
 from eplasty.ctx import set_context, start_session, add, commit
