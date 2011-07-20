@@ -18,7 +18,7 @@ class Field(object):
             try:
                 return self._default
             except AttributeError:
-                raise AttributeError, ('The field {0} is neither set nor '
+                raise AttributeError('The field {0} is neither set nor '
                     'has default value'.format(
                         self.name
                     ))
@@ -32,7 +32,7 @@ class Field(object):
                     type(v), type(self)
                 ))
         except NotImplementedError:
-            raise TypeError, self.RO_MESSAGE
+            raise TypeError(self.RO_MESSAGE)
 
     def _is_compatible(self, v):
         raise NotImplementedError

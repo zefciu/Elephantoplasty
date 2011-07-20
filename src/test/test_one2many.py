@@ -2,7 +2,7 @@ import unittest
 
 from psycopg2 import ProgrammingError
 
-from util import get_test_conn
+from .util import get_test_conn
 import eplasty as ep
 
 

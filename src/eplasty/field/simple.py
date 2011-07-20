@@ -2,7 +2,7 @@
 This module contains one-column read-write fields
 '''
 
-from one_column import OneColumn
+from .one_column import OneColumn
 from eplasty import column as c
 
 class Simple(OneColumn):

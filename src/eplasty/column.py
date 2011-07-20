@@ -25,12 +25,12 @@ class Column(object):
         self.pgattrs = []
         
         if not null:
-            self.pgattrs.append('NOT NULL')
+            self.pgattrs.append(('NOT NULL', []))
         else:
             self.compat_types.append(type(None))
         
         if default is not False:
-            self.pgattrs.append('DEFAULT {0}'.format(adapt(default).getquoted()))
+            self.pgattrs.append(('DEFAULT %s', [default]))
             
         self.attrs = []
         self.kwattrs = dict(
@@ -52,8 +52,8 @@ class Column(object):
     def _set_value(self, v, inst, cls):
         from eplasty.table.const import MODIFIED, UNCHANGED, UPDATED
         if not self._is_compatible(v):
-            raise TypeError, ('Python type {0} is not compatible with column'
-                'type {1}').format(type(v), type(self))
+            raise TypeError(('Python type {0} is not compatible with column'
+                'type {1}').format(type(v), type(self)))
         inst._current[self.name] = v
         if inst._status in [UNCHANGED, UPDATED]:
             inst._status = MODIFIED
@@ -69,8 +69,8 @@ class Column(object):
             name = self.name,
             pgtype = self.pgtype,
             length = '({0})'.format(self.length) if self.length else '',
-            pgattrs = ' '.join(self.pgattrs),
-        )
+            pgattrs = ' '.join(a[0] for a in self.pgattrs),
+        ), sum([a[1] for a in self.pgattrs], [])
 
     def bind(self, cls, name):
         """Adds owner class and name to the column and returns self"""
@@ -115,4 +115,4 @@ class Integer(Column):
     
 class CharacterVarying(Column):
     pgtype = 'character varying'
-    compat_types = [basestring]
+    compat_types = [str]

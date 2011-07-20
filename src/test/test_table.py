@@ -2,7 +2,7 @@ import unittest
 from eplasty.table.base import Table
 from eplasty import field as f
 from eplasty.ctx import get_connection, set_context, start_session, add, commit
-from util import get_test_conn
+from .util import get_test_conn
 
 
 class Test(unittest.TestCase):

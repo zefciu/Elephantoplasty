@@ -1,5 +1,5 @@
 import eplasty as ep
-from base import Relation
+from .base import Relation
 from eplasty.util import clsname2tname, clsname2kname
 from eplasty.table.meta import TableMeta
 from eplasty.relation.many_to_one import ManyToOne

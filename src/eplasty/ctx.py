@@ -3,7 +3,7 @@ from psycopg2.extensions import cursor, connection
 from eplasty.session import Session
 import psycopg2
 
-class CtxError(StandardError):
+class CtxError(Exception):
     """Exception raised on problems with context"""
     
 class Ctx(object):
@@ -36,7 +36,7 @@ Get a connection. Will return the argument or try to find connection in context
     elif ctx.connection:
         return ctx.connection
     else:
-        raise CtxError, 'No connection passed and no in global context'
+        raise CtxError('No connection passed and no in global context')
     
 def get_cursor(arg = None):
     """Get a cursor. Will try do create it in the following way:
@@ -57,7 +57,7 @@ def get_cursor(arg = None):
         elif isinstance(arg, connection):
             return arg.cursor()
         else:
-            raise TypeError, 'Context must be a connection or a cursor'
+            raise TypeError('Context must be a connection or a cursor')
     else:
         if ctx.cursor:
             return ctx.cursor
@@ -66,7 +66,7 @@ def get_cursor(arg = None):
             ctx.cursor = cur
             return cur
         else:
-            raise CtxError, 'No context available to create a cursor'
+            raise CtxError('No context available to create a cursor')
 
 def set_context(arg):
     """Set a global context using a connection or cursor"""
@@ -78,12 +78,7 @@ def set_context(arg):
         ctx.connection = arg.connection
         ctx.cursor = arg
     else:
-        raise (
-            TypeError,
-            'Context must be a connection or a cursor, not {0}'.format(
-                type(arg)
-            )
-        )
+        raise TypeError
         
 def del_context():
     """Clear the global context"""
@@ -106,7 +101,7 @@ def commit():
     if ctx.session:
         ctx.session.commit()
     else:
-        raise CtxError, 'No session in global context'
+        raise CtxError('No session in global context')
     
 def add(*args, **kwargs):
     """Add to global session"""
@@ -114,7 +109,7 @@ def add(*args, **kwargs):
     if ctx.session:
         ctx.session.add(*args, **kwargs)
     else:
-        raise CtxError, 'No session in global context'
+        raise CtxError('No session in global context')
         
 
 def is_global_session():
@@ -130,4 +125,4 @@ def get_session(s = None):
     s = is_global_session()
     if s:
         return s
-    raise CtxError, 'Cannot find a session'
+    raise CtxError('Cannot find a session')

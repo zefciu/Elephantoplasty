@@ -1,4 +1,4 @@
-from base import Field
+from .base import Field
 
 class OneColumn(Field):
     '''

@@ -2,7 +2,7 @@ import unittest
 from eplasty import field as f
 from eplasty.table import Table
 from eplasty.ctx import set_context, start_session, commit, add, get_connection
-from util import get_test_conn
+from .util import get_test_conn
 from eplasty.table.exc import NotFound, TooManyFound
 
 class Test(unittest.TestCase):

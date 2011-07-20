@@ -4,7 +4,7 @@ from setuptools import setup
 setup(
       name = 'Elephantoplasty',
       version = '0.0.1',
-      author = u'Szymon Pyżalski',
+      author = 'Szymon Pyżalski',
       author_email = 'zefciu <szymon@pythonista.net>',
       description = 'A PostgreSQL ORM',
       license = 'BSD',

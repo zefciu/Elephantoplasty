@@ -1,7 +1,7 @@
-from ctx import *
+from .ctx import *
 
-from table.base import Table
+from .table.base import Table
 
-import field as f
-import column as col
-import relation as rel
+from . import field as f
+from . import column as col
+from . import relation as rel

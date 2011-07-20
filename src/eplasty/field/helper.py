@@ -2,7 +2,7 @@
 Various useful field types
 '''
 
-from one_column import OneColumn
+from .one_column import OneColumn
 from eplasty.column import BigSerial
 
 class SimplePK(OneColumn):

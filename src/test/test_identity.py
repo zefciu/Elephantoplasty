@@ -2,7 +2,7 @@ import unittest
 
 import eplasty as ep
 from eplasty import field as f
-from util import get_test_conn
+from .util import get_test_conn
 
 
 class Test(unittest.TestCase):

@@ -9,13 +9,12 @@ from eplasty.table.exc import NotFound, TooManyFound
 from eplasty.table.const import NEW, UNCHANGED, MODIFIED
 from eplasty.result import Result
 
-class Table(object):
+class Table(object, metaclass=TableMeta):
     """Parent class for all table classes"""
-    __metaclass__ = TableMeta
     
     def __init__(self, **kwargs):
         if self._abstract:
-            raise NotImplementedError, 'Abstract class'
+            raise NotImplementedError('Abstract class')
         
         
         field_names = [
@@ -23,11 +22,11 @@ class Table(object):
         ]
         self._status = NEW
         self._flushed = False
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             if k not in field_names:
-                raise TypeError, 'Class {0} has no attribute {1}'.format(
+                raise TypeError('Class {0} has no attribute {1}'.format(
                     type(self).__name__, k
-                )
+                ))
             setattr(self, k, v)
             
     def __new__(cls, *args, **kwargs):
@@ -51,7 +50,7 @@ class Table(object):
         col_values = []
         for f in it.chain(self.fields, self.inh_fields):
             cvals = f.get_c_vals(self._current)
-            for cname, cval in cvals.iteritems():
+            for cname, cval in cvals.items():
                 col_names.append(cname)
                 col_values.append(cval)
         cursor.execute(
@@ -63,7 +62,7 @@ class Table(object):
             col_values
         )
         new_pk_val = cursor.fetchone()
-        for pk_val in it.izip(self.__pk__, new_pk_val):
+        for pk_val in zip(self.__pk__, new_pk_val):
             col, val = pk_val
             self._current[col] = val
             
@@ -108,7 +107,7 @@ Flush this object to database using given cursor
     def _get_conditions(cls, *args, **kwargs):
         """Reformats args and kwargs to a ``Condition`` object"""
         args = list(args)
-        for k, v in kwargs.iteritems():
+        for k, v in kwargs.items():
             args.append(cond.Equals(k, v))
         
         if not args:
@@ -151,9 +150,9 @@ Flush this object to database using given cursor
             session.add(r)
             return r
         elif cursor.rowcount == 0:
-            raise NotFound, "Didn't find anything"
+            raise NotFound("Didn't find anything")
         else:
-            raise TooManyFound, "Found more than one row"
+            raise TooManyFound("Found more than one row")
     
     @classmethod
     def find(cls, session = None, *args, **kwargs):

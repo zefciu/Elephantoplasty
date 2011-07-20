@@ -6,7 +6,7 @@ Created on Jun 7, 2011
 import unittest
 from eplasty.ctx import del_context, set_context, get_cursor, CtxError, connect
 from eplasty.ctx import get_connection, commit, add, get_session
-from util import get_test_conn, config
+from .util import get_test_conn, config
 from psycopg2.extensions import cursor
 from eplasty.session import Session
 

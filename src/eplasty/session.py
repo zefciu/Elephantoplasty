@@ -77,7 +77,7 @@ and are able to flush them to database
                 o._status = UNCHANGED
                 o._flushed = False
 
-        for tname, collection in self.nopk_objects.iteritems():
+        for tname, collection in self.nopk_objects.items():
             self.pk_objects.setdefault(tname, {})
             for o in collection:
                 self.pk_objects[tname][o.get_pk_value()] = o

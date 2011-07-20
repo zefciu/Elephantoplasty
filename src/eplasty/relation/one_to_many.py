@@ -1,11 +1,11 @@
-from const import NO_ACTION, LIST, RESULT
+from .const import NO_ACTION, LIST, RESULT
 
 from eplasty.util import clsname2kname, camel2underscore, diff_unsorted
 from eplasty.result import Result
 from eplasty.conditions import Equals
 from eplasty.relation.many_to_one import ManyToOne
 
-from base import Relation
+from .base import Relation
 from eplasty.lazy import LazyQuery
 
 class OneToMany(Relation):
@@ -53,7 +53,7 @@ class OneToMany(Relation):
 
     def __set__(self, inst, v):
         if isinstance(v, Result):
-            raise TypeError, 'Result objects are read-only. Use list instead'
+            raise TypeError('Result objects are read-only. Use list instead')
         prev = inst._current.get(self.name, [])
         added, deleted = diff_unsorted(prev, v) #@UnusedVariable
         for obj in added:

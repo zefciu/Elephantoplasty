@@ -1,5 +1,5 @@
-from const import NO_ACTION
-from base import Relation
+from .const import NO_ACTION
+from .base import Relation
 from eplasty.lazy import LazyQuery
 
 
@@ -13,7 +13,7 @@ class ManyToOne(Relation):
         self.foreign_class = foreign_class
         self.foreign_pk = self.foreign_class.get_pk()
         if len(self.foreign_pk) != 1:
-            raise TypeError, "Referencing composite pk's not implemented"
+            raise TypeError("Referencing composite pk's not implemented")
         self.foreign_pk = self.foreign_pk[0]
         self.ColType = type(self.foreign_pk)
         self.on_update = on_update

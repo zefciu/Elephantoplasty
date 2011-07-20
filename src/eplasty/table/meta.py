@@ -16,7 +16,7 @@ class TableMeta(type):
     def __init__(cls, classname, bases, dict_):
         fields = [
             f.bind_class(cls, n)
-            for n, f in dict_.iteritems() if isinstance(f, Field)
+            for n, f in dict_.items() if isinstance(f, Field)
         ]
 
         if not fields:
@@ -80,17 +80,18 @@ selecting a table name"""
         )
         {inh_clause};""".format(
             tname = cls.__table_name__, columns = ',\n'.join(
-                column_decls + constraints
+                [d[0] for d in column_decls] + constraints
             ), inh_clause = (
                 'INHERITS ({0})'.format(', '.join((
                     c.__table_name__ for c in cls.parent_classes)
                 )) if cls.parent_classes else ''
             )
         )
+        args = sum([d[1] for d in column_decls], [])
         retried = False
         while True:
             try:
-                cursor.execute(command)
+                cursor.execute(command, args)
                 break
             except ProgrammingError as e:
                 cursor.connection.rollback()
