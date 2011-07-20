@@ -26,6 +26,8 @@ class Test(unittest.TestCase):
         start_session()
         life = Movie(title = 'Life of Brian')
         grail = Movie(title = 'MP & the Holy Grail')
+        add(life)
+        add(grail)
         for c in [
             ('Brain', life),
             ('Patsy', grail),
@@ -35,8 +37,6 @@ class Test(unittest.TestCase):
             char = Character(name = name, movie = movie)
             add(char)
             
-        add(life)
-        add(grail)
         commit()
 
         self.Character = Character
@@ -54,6 +54,7 @@ class Test(unittest.TestCase):
             
 
     def test_get(self):
+        start_session()
         c = self.Character.get(name = 'Patsy')
         self.assertEqual(c.movie.title, 'MP & the Holy Grail')
 

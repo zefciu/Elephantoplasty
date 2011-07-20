@@ -33,6 +33,13 @@ class Test(unittest.TestCase):
         
         self.assertRaises(TypeError, lambda: Spam(bacon = 'sausage'))
         
+    def test_empty_field(self):
+        """Trying to get a value of unset field"""
+        class Spam(Table):
+            eggs = CharacterVarying()
+        spam = Spam()
+        self.assertRaises(AttributeError, lambda: spam.eggs)
+        
     def tearDown(self):
         try:
             conn = get_test_conn()

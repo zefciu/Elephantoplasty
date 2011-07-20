@@ -11,8 +11,6 @@ class OneColumn(Field):
         self.columns = [self.column]
         super(OneColumn, self).__init__(name, *args, **kwargs)
 
-    def _get_value(self, inst, cls):
-        return self.column._get_value(self, inst, cls)
 
     def get_c_vals(self, dict_):
         """Gets a mapping of column_name -> column_value for this field"""

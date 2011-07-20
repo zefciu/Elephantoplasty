@@ -99,6 +99,11 @@ selecting a table name"""
                         if hasattr(col, 'foreign_class'):
                             col.foreign_class.create_table()
                             retried = True
+                            break
+                        else:
+                            raise
+                else:
+                    raise
 
         cursor.connection.commit()
 

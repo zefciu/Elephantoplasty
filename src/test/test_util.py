@@ -30,9 +30,12 @@ class Test(unittest.TestCase):
         self.assertEqual(
             result, ['ba', 'bb', 'bc', 'xaa', 'xab', 'xac']
         )
-            
-        
 
+    def test_diff_unsorted(self):
+        """Test the diff_unsorted() method"""
+        added, deleted = util.diff_unsorted(['a', 'b', 'c'], ['a', 'b', 'd'])
+        self.assertEqual(added, ['d'])
+        self.assertEqual(deleted, ['c'])
 
 if __name__ == "__main__":
     unittest.main()

@@ -37,18 +37,8 @@ class Field(object):
     def _is_compatible(self, v):
         raise NotImplementedError
 
-    @property
-    def value(self):
-        if hasattr(self, '_value'):
-            return self._value
-        elif hasattr(self, '_default'):
-            return self._default
-        else:
-            raise AttributeError,\
-                'Field {0} has neither set nor default value'.format(self.name)
-        
-    def get_c_vals(self, dict_):
-        return {}
+#    def get_c_vals(self, dict_):
+#        return {}
 
 
     def bind_class(self, cls, name):

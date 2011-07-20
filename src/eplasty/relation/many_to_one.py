@@ -23,21 +23,26 @@ class ManyToOne(Relation):
         
     def _is_compatible(self, value):
         return isinstance(value, self.foreign_class)
+    
+    @property
+    def constraints(self):
+        return [self.constraint]
 
     def bind_class(self, cls, name):
         super(ManyToOne, self).bind_class(cls, name)
-        constraint = """FOREIGN KEY ({name}) REFERENCES {f_table} ({f_column}) 
-        ON UPDATE {on_update} ON DELETE {on_delete}""".format(
-            name=self.name, f_table=self.foreign_class.__table_name__,
-            f_column=self.foreign_pk.name, on_update=self.on_update,
-            on_delete = self.on_delete,
-        )
         length = self.foreign_pk.length
         name = self.name + '_id'
         self.column = self.ColType(
-            name=name, length=length, null=self.null, constraint=constraint
+            name=name, length=length, null=self.null
         )
         self.columns = [self.column]
+        self.constraint = """
+        FOREIGN KEY ({name}) REFERENCES {f_table} ({f_column}) 
+        ON UPDATE {on_update} ON DELETE {on_delete}""".format(
+            name=self.column.name, f_table=self.foreign_class.__table_name__,
+            f_column=self.foreign_pk.name, on_update=self.on_update,
+            on_delete = self.on_delete,
+        )
         return self
 
     def hydrate(self, ins, col_vals, dict_, session):
