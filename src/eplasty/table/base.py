@@ -9,8 +9,9 @@ from eplasty.table.exc import NotFound, TooManyFound
 from eplasty.table.const import NEW, UNCHANGED, MODIFIED
 from eplasty.result import Result
 
-class Table(object, metaclass=TableMeta):
+class Table(object):
     """Parent class for all table classes"""
+    __metaclass__ = TableMeta
     
     def __init__(self, **kwargs):
         if self._abstract:

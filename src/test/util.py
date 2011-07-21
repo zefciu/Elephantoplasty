@@ -1,5 +1,5 @@
 import os
-from configparser import SafeConfigParser
+from ConfigParser import SafeConfigParser
 from psycopg2 import connect
 
 config_file = os.path.join(

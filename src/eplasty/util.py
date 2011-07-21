@@ -45,7 +45,7 @@ class queue_iterator(object):
     def __iter__(self):
         return self
     
-    def __next__(self):
+    def next(self):
         try:
             return self.list_.pop(0)
         except IndexError:

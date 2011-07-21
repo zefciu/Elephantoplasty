@@ -4,7 +4,7 @@ class ResultIterator(object):
         self.cls = result.cls
         self.cursoriterator = iter(result.cursor)
     
-    def __next__(self):
+    def next(self):
         tup = next(self.cursoriterator)
         return self.cls.hydrate(tup, self.result.session)
         
