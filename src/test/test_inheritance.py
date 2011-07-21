@@ -1,14 +1,14 @@
 import unittest
 import eplasty as ep
 from eplasty import field as f
-from eplasty.table import Table
+from eplasty import Object
 from .util import get_test_conn
 
 
 class Test(unittest.TestCase):
 
     def setUp(self):
-        class Character(Table):
+        class Character(Object):
             name = f.CharacterVarying(length = 20)
             
         class Knight(Character):

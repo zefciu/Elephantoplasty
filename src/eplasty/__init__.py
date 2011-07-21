@@ -1,6 +1,6 @@
 from .ctx import *
 
-from .table.base import Table
+from .object.base import Object
 
 from . import field as f
 from . import column as col

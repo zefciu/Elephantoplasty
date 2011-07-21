@@ -15,10 +15,10 @@ class Test(unittest.TestCase):
         ep.set_context(self.connection)
         ep.start_session()
 
-        class Ingredient(ep.Table):
+        class Ingredient(ep.Object):
             name = ep.f.CharacterVarying(20)
 
-        class Meal(ep.Table):
+        class Meal(ep.Object):
             name = ep.f.CharacterVarying(20)
             ingredients = ep.rel.OneToMany(Ingredient)
 

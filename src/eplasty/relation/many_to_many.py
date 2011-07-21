@@ -1,7 +1,7 @@
 import eplasty as ep
 from .base import Relation
 from eplasty.util import clsname2tname, clsname2kname
-from eplasty.table.meta import TableMeta
+from eplasty.table.meta import ObjectMeta
 from eplasty.relation.many_to_one import ManyToOne
 # from eplasty import relation as r
 
@@ -40,8 +40,8 @@ class ManyToMany(Relation):
             self.name, self.foreign_class.__table_name__
         )
             
-        self.PrimaryTable = TableMeta(
-            primary_table_clsname, (ep.Table,), {
+        self.PrimaryTable = ObjectMeta(
+            primary_table_clsname, (ep.Object,), {
                 '__table_name__': primary_table_name,
                 self.owner_fk: ManyToOne(self.owner_class),
                 self.foreign_fk: ManyToOne(self.foreign_class),

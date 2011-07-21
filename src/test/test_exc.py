@@ -5,7 +5,7 @@ import unittest
 
 from psycopg2 import ProgrammingError
 
-from eplasty.table import Table
+from eplasty import Object
 from eplasty.conditions import Condition
 from eplasty.field import CharacterVarying
 from eplasty.ctx import set_context, add, commit, start_session
@@ -18,7 +18,7 @@ class Test(unittest.TestCase):
 
     def test_virtual_table(self):
         """Trying to get an instance of a table with no columns"""
-        class Abs(Table):
+        class Abs(Object):
             pass
         self.assertRaises(NotImplementedError, lambda: Abs())
         
@@ -28,14 +28,14 @@ class Test(unittest.TestCase):
         
     def test_invalid_column(self):
         """Trying to initialize a row with nonexistent column name"""
-        class Spam(Table):
+        class Spam(Object):
             eggs = CharacterVarying()
         
         self.assertRaises(TypeError, lambda: Spam(bacon = 'sausage'))
         
     def test_empty_field(self):
         """Trying to get a value of unset field"""
-        class Spam(Table):
+        class Spam(Object):
             eggs = CharacterVarying()
         spam = Spam()
         self.assertRaises(AttributeError, lambda: spam.eggs)
@@ -62,7 +62,7 @@ class Test(unittest.TestCase):
         conn.commit()
         set_context(conn)
         start_session()
-        class Spam(Table):
+        class Spam(Object):
             bacon = CharacterVarying(length = 10)
         
         add(Spam(bacon = 'sausage'))

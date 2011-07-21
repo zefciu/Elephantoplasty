@@ -4,14 +4,15 @@ import itertools as it
 
 from eplasty import conditions as cond
 from eplasty.ctx import get_session
-from eplasty.table.meta import TableMeta
-from eplasty.table.exc import NotFound, TooManyFound
-from eplasty.table.const import NEW, UNCHANGED, MODIFIED
 from eplasty.result import Result
 
-class Table(object):
-    """Parent class for all table classes"""
-    __metaclass__ = TableMeta
+from .meta import ObjectMeta
+from .exc import NotFound, TooManyFound
+from .const import NEW, MODIFIED
+
+class Object(object):
+    """Parent class for all eplasty Object classes"""
+    __metaclass__ = ObjectMeta
     
     def __init__(self, **kwargs):
         if self._abstract:
@@ -31,7 +32,7 @@ class Table(object):
             setattr(self, k, v)
             
     def __new__(cls, *args, **kwargs):
-        self = super(Table, cls).__new__(cls)
+        self = super(Object, cls).__new__(cls)
         self._current = {}
         self._initial = {}
         return self
@@ -157,7 +158,9 @@ Flush this object to database using given cursor
     
     @classmethod
     def find(cls, session = None, *args, **kwargs):
-        """Execute the query on this table and return a ``Result`` object."""
+        """
+        Execute the query on this object class and return a ``Result`` object.
+        """
         session = get_session(session)
         tmp_cursor = session.cursor()
         condition = cls._get_conditions(*args, **kwargs)

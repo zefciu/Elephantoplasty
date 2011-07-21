@@ -8,9 +8,9 @@ from eplasty.util import clsname2tname
 from eplasty.ctx import get_cursor
 from psycopg2.errorcodes import UNDEFINED_TABLE
 from eplasty.field import SimplePK
-from eplasty.table.const import UNCHANGED
+from .const import UNCHANGED
 
-class TableMeta(type):
+class ObjectMeta(type):
     """Metaclass for Object types"""
     
     def __init__(cls, classname, bases, dict_):
@@ -25,7 +25,7 @@ class TableMeta(type):
             cls._abstract = False
             cls._setup_non_abstract(classname, bases, dict_, fields)
         
-        super(TableMeta, cls).__init__(classname, bases, dict_)
+        super(ObjectMeta, cls).__init__(classname, bases, dict_)
         
     def _setup_non_abstract(cls, classname, bases, dict_, fields): #@NoSelf
         """Setups the non-abstract class creating primary key if needed and

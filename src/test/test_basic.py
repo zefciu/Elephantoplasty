@@ -1,9 +1,9 @@
 import unittest
 from eplasty import field as f
-from eplasty.table import Table
+from eplasty import Object
 from eplasty.ctx import set_context, start_session, commit, add, get_connection
 from .util import get_test_conn
-from eplasty.table.exc import NotFound, TooManyFound
+from eplasty.object import NotFound, TooManyFound
 
 class Test(unittest.TestCase):
     """
@@ -12,7 +12,7 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
 
     def setUp(self):
         
-        class Knight(Table):
+        class Knight(Object):
             title = f.CharacterVarying(
                 length = 5, null = False, default = 'Sir'
             )

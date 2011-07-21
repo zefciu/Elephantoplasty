@@ -9,7 +9,7 @@ class Test(unittest.TestCase):
 
 
     def setUp(self):
-        class Knight(ep.Table):
+        class Knight(ep.Object):
             title = f.CharacterVarying(
                 length = 5, null = False, default = 'Sir'
             )

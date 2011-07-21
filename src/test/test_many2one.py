@@ -2,7 +2,7 @@ import unittest
 
 from psycopg2 import ProgrammingError
 
-from eplasty.table.base import Table
+from eplasty import Object
 from eplasty.field import CharacterVarying
 from eplasty.relation import ManyToOne
 from test.util import get_test_conn
@@ -14,10 +14,10 @@ class Test(unittest.TestCase):
 
     def setUp(self):
 
-        class Movie(Table):
+        class Movie(Object):
             title = CharacterVarying(30)
 
-        class Character(Table):
+        class Character(Object):
             name = CharacterVarying(30)
             movie = ManyToOne(Movie)
 

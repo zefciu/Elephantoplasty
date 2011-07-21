@@ -1,5 +1,5 @@
 import unittest
-from eplasty.table.base import Table
+from eplasty import Object
 from eplasty import field as f
 from eplasty.ctx import get_connection, set_context, start_session, add, commit
 from .util import get_test_conn
@@ -20,7 +20,7 @@ class Test(unittest.TestCase):
 
     def test_custom_name(self):
         """Creating a table with custom table_name"""
-        class Spam(Table):
+        class Spam(Object):
             __table_name__ = 'eggs'
             meal = f.CharacterVarying(length = 10)
             

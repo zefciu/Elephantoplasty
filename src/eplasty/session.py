@@ -50,7 +50,7 @@ and are able to flush them to database
                 self.nopk_objects[type(o).__table_name__].append(o)
 
     def flush(self):
-        from eplasty.table.const import NEW, MODIFIED, UPDATED, UNCHANGED
+        from eplasty.object.const import NEW, MODIFIED, UPDATED, UNCHANGED
         cursor = self.cursor()
         queue = self.objects[:]
         for o in queue_iterator(queue):

@@ -50,7 +50,7 @@ class Column(object):
         return False
 
     def _set_value(self, v, inst, cls):
-        from eplasty.table.const import MODIFIED, UNCHANGED, UPDATED
+        from eplasty.object.const import MODIFIED, UNCHANGED, UPDATED
         if not self._is_compatible(v):
             raise TypeError(('Python type {0} is not compatible with column'
                 'type {1}').format(type(v), type(self)))
