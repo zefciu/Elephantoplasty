@@ -1,3 +1,4 @@
+from eplasty.object.const import MODIFIED, UNCHANGED, UPDATED
 class Field(object):
     """
     Fields are high-level representation of data stored in Objects.
@@ -27,6 +28,8 @@ class Field(object):
         try:
             if self._is_compatible(v):
                 inst._current[self.name] = v
+                if inst._status in [UNCHANGED, UPDATED]:
+                    inst._status = MODIFIED
             else:
                 raise TypeError('Type {0} is incompatible with field {1}'.format(
                     type(v), type(self)

@@ -40,13 +40,12 @@ class Object(object):
     @property
     def _diff(self):
         r = []
-        for c in self.columns:
-            n = c.name
+        for f in self.fields:
+            n = f.name
             if self._initial[n] != self._current[n]:
-                r.append ((c, (self._initial[n], self._current[n])))
-                
+                r.append ((f, (self._initial[n], self._current[n])))
         return r
-    
+
     def _flush_new(self, session, cursor):
         col_names = []
         col_values = []
@@ -75,9 +74,11 @@ class Object(object):
         col_names = []
         col_values = []
         
-        for col, (was, is_) in diff: #@UnusedVariable
-            col_names.append('{0} = %s'.format(col.name))
-            col_values.append(col.get_raw(session))
+        for f, (was, is_) in diff: #@UnusedVariable
+            cvals = f.get_c_vals(self._current)
+            for c, v in cvals.iteritems():
+                col_names.append('{0} = %s'.format(c))
+                col_values.append(v)
             
         pk = self._current['id']
         col_names = ', '.join(col_names)

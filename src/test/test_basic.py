@@ -41,6 +41,7 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
             add(k)
             
         commit()
+        start_session()
  
     def tearDown(self):
         c = get_connection()
@@ -78,9 +79,10 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         k = self.Knight.get(2)
         k.name = 'John'
         commit()
+        start_session()
         k_got = self.Knight.get(2)
         self.assertEqual(k_got.name, 'John')
-        
+
     def test_incompatible(self):
         k = self.Knight.get(2)
         def broken():
