@@ -6,39 +6,31 @@ class Column(object):
     of underlying database table
     """
     __slots__ = [
-        'name', 'pgtype', 'length', 'attrs', 'constraint', 'owner_class',
+        'name', 'pgtype', 'length', 'attrs', 'owner_class',
         'owner', 'pseudo', 'compat_types'
     ]
 
     pseudo = False
 
     def __init__(
-        self, name=None, length=None, null=True, default=False, constraint=None,
-        **kwargs
+        self, name=None, length=None, null=True, default=False,
+        references = None, **kwargs
     ):
         self.name = name
         self.length = length
         self.null = null
         self.default = default
-        self.constraint = constraint
-        
+        self.references = references
+
         self.pgattrs = []
-        
+
         if not null:
             self.pgattrs.append(('NOT NULL', []))
         else:
             self.compat_types.append(type(None))
-        
+
         if default is not False:
             self.pgattrs.append(('DEFAULT %s', [default]))
-            
-        self.attrs = []
-        self.kwattrs = dict(
-            name = name,
-            length = length,
-            null = null,
-            default = default
-        )
 
         self.owner_class = None
 
@@ -78,14 +70,6 @@ class Column(object):
         self.name = name
         return self
 
-    def get_row_bound(self, row):
-        """Creates a copy of this column that is bound to a specific row"""
-        copy = type(self)(*self.attrs, **self.kwattrs)
-        copy.owner = row
-        copy.owner_class = self.owner_class
-        copy.name = self.name
-        return copy
-
     def hydrate(self, value, session):
         """Transform raw value from database to object version"""
         return value
@@ -105,14 +89,19 @@ class BigSerial(Column):
     """PostgreSQL BigSerial type"""
     pgtype = 'bigserial'
     compat_types = [] #R/O
-    
-    
+
+
 class Integer(Column):
     """PostgreSQL integer type"""
     pgtype = 'integer'
     compat_types = [int]
-    
-    
+
+class BigInt(Column):
+    """PostgreSQL integer type"""
+    pgtype = 'bigint'
+    compat_types = [int]
+
+
 class CharacterVarying(Column):
     pgtype = 'character varying'
     compat_types = [str]

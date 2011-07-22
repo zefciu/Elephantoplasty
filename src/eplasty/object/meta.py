@@ -91,18 +91,19 @@ selecting a table name"""
         retried = False
         while True:
             try:
+                print cursor.mogrify(command, args)
                 cursor.execute(command, args)
                 break
             except ProgrammingError as e:
                 cursor.connection.rollback()
                 if e.pgcode == UNDEFINED_TABLE and not retried:
                     for col in cls.columns:
-                        if hasattr(col, 'foreign_class'):
-                            col.foreign_class.create_table()
+                        if col.references is not None:
+                            col.references.create_table()
                             retried = True
                             break
-                        else:
-                            raise
+                    else:
+                        raise
                 else:
                     raise
 

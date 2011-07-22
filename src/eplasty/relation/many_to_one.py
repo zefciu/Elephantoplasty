@@ -1,14 +1,14 @@
-from .const import NO_ACTION
+from .const import CASCADE, SET_NULL
 from .base import Relation
 from eplasty.lazy import LazyQuery
+from eplasty.column import BigSerial, BigInt
 
 
 class ManyToOne(Relation):
     """Many-to-one relationship on the 'many' side"""
     
     def __init__(
-        self, foreign_class, null = True, on_update = NO_ACTION,
-        on_delete = NO_ACTION, **kwargs
+        self, foreign_class, dependent=False, **kwargs
     ):
         self.foreign_class = foreign_class
         self.foreign_pk = self.foreign_class.get_pk()
@@ -16,13 +16,21 @@ class ManyToOne(Relation):
             raise TypeError("Referencing composite pk's not implemented")
         self.foreign_pk = self.foreign_pk[0]
         self.ColType = type(self.foreign_pk)
+        if self.ColType == BigSerial:
+            self.ColType = BigInt
+        self.dependent = dependent
+        on_update = on_delete = CASCADE if dependent else SET_NULL
         self.on_update = on_update
         self.on_delete = on_delete
-        self.null = null
+        self.null = not dependent
         super(ManyToOne, self).__init__(**kwargs)
         
     def _is_compatible(self, value):
-        return isinstance(value, self.foreign_class)
+        if self.dependent:
+            return isinstance(value, self.foreign_class)
+        else:
+            return isinstance(value, (self.foreign_class, type(None)))
+            
     
     @property
     def constraints(self):
@@ -32,9 +40,12 @@ class ManyToOne(Relation):
         super(ManyToOne, self).bind_class(cls, name)
         length = self.foreign_pk.length
         name = self.name + '_id'
-        self.column = self.ColType(
-            name=name, length=length, null=self.null
+        col_kwargs = dict(name=name, length=length, null=self.null,
+            references=self.foreign_class
         )
+        if self.null:
+            col_kwargs['default'] = None
+        self.column = self.ColType(**col_kwargs)
         self.columns = [self.column]
         self.constraint = """
         FOREIGN KEY ({name}) REFERENCES {f_table} ({f_column}) 
@@ -64,4 +75,6 @@ class ManyToOne(Relation):
         return inst._current[self.name]
 
     def get_dependencies(self, dict_):
-        yield dict_[self.name]
+        if dict_[self.name] is not None:
+            yield dict_[self.name]
+            

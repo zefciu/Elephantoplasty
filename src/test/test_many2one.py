@@ -46,8 +46,8 @@ class Test(unittest.TestCase):
     def tearDown(self):
         cur = self.connection.cursor()
         try:
-            cur.execute('DROP TABLE characters;')
-            cur.execute('DROP TABLE movies;')
+            cur.execute('DROP TABLE characters CASCADE;')
+            cur.execute('DROP TABLE movies CASCADE;')
             self.connection.commit()
         except ProgrammingError:
             pass

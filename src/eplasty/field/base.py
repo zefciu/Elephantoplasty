@@ -37,13 +37,6 @@ class Field(object):
         except NotImplementedError:
             raise TypeError(self.RO_MESSAGE)
 
-    def _is_compatible(self, v):
-        raise NotImplementedError
-
-#    def get_c_vals(self, dict_):
-#        return {}
-
-
     def bind_class(self, cls, name):
         self.owner_class = cls
         self.name = name
