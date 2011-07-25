@@ -7,6 +7,7 @@ PostgresSQL. It is currently under steady development.
 
 Philosophy
 ---------------
+
 #. PostgresSQL is great. However portable ORM's use it like SQLite. To use
    all features of Postgres we need to drop portability to weaker engines.
 #. Simple things should be simple, complicated things should be possible.
@@ -21,16 +22,21 @@ DONE
 
 #. Simple tables.
 #. Inheritance.
-#. Simplest one-to-many
+#. Simplest one-to-many and many-to-one
 #. EAFP table creation
 #. Simplest identities
 
 TODO
 ------------------
-#. Different relation loading strategies (lazy, joined etc).
+
+#. Dependent and independent relations
+#. Joined loading strategy
 #. Many-to-many
+#. Advanced primary keys
 #. EAFP table migration
 #. Concurrency control
 #. Conflict detection
 #. Advanced identities
 #. List-like and dict-like relations
+#. Trees
+#. Documentation
