@@ -9,7 +9,6 @@ import eplasty as ep
 class Test(unittest.TestCase):
     """Basic test for one-to-many relation"""
 
-
     def setUp(self):
         self.connection = get_test_conn()
         ep.set_context(self.connection)
@@ -39,7 +38,6 @@ class Test(unittest.TestCase):
         self.Ingredient = Ingredient
         self.Meal = Meal
 
-
     def tearDown(self):
         cur = self.connection.cursor()
         try:
@@ -49,7 +47,6 @@ class Test(unittest.TestCase):
         except ProgrammingError:
             pass
 
-
     def test_get_one(self):
         """Test if a single object gets correct set of children"""
         ep.start_session()
@@ -58,6 +55,17 @@ class Test(unittest.TestCase):
             set([i.name for i in meal.ingredients]),
             set(['spam', 'bacon'])
         )
+
+    def test_crude_remove(self):
+        """Testing the behavior when we pop an element from list using ugly
+        unpythonish syntax"""
+        ep.start_session()
+        meal = self.Meal.get(1)
+        ing = meal.ingredients[0]
+        self.assertEqual(ing.meal, meal)
+        meal.ingredients = meal.ingredients[1:]
+        self.assertEqual(ing.meal, None)
+
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ Various utilities.
 '''
 
 import re
+import types
 
 CAPITAL = re.compile('[A-Z]')
 
@@ -63,3 +64,25 @@ def diff_unsorted(prev, curr):
             added.append(o)
     
     return added, deleted
+
+class TraceableList(list):
+    """This is a list subclass that calls a given callback when changed"""
+    pass
+
+class _TraceableOverride(object):
+    """Callable used to overwrite list methods"""
+
+    def __init__(self, method_name):
+        self.__name__ = self.method_name = method_name
+
+    def __call__(self, owner, *args, **kwargs):
+        prev = owner[:]
+        getattr(super(TraceableList, owner), self.method_name)(*args, **kwargs)
+        now = owner[:]
+        owner.callback(prev, now)
+
+    def __get__(self, inst, type):
+        return types.MethodType(self, inst, type)
+
+for method_name in ['pop', 'insert']:
+    setattr(TraceableList, method_name, _TraceableOverride(method_name))

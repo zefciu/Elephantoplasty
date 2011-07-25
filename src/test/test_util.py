@@ -37,5 +37,19 @@ class Test(unittest.TestCase):
         self.assertEqual(added, ['d'])
         self.assertEqual(deleted, ['c'])
 
+    def test_traceable_list(self):
+        """Test the TraceableList object"""
+        
+        results = {}
+        
+        class SampleTraceableList(util.TraceableList):
+            def callback(self, was, is_):
+                results['was'] = was
+                results['is_'] = is_
+                
+        s = SampleTraceableList([1, 2, 3, 4])
+        s.pop()
+        self.assertEqual(results, {'was': [1, 2, 3, 4], 'is_': [1, 2, 3]})
+
 if __name__ == "__main__":
     unittest.main()

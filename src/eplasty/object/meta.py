@@ -91,7 +91,7 @@ selecting a table name"""
         retried = False
         while True:
             try:
-                print cursor.mogrify(command, args)
+                # print cursor.mogrify(command, args)
                 cursor.execute(command, args)
                 break
             except ProgrammingError as e:

@@ -1,6 +1,6 @@
-from .const import NO_ACTION, LIST, RESULT
+from .const import LIST
 
-from eplasty.util import clsname2kname, camel2underscore, diff_unsorted
+from eplasty.util import camel2underscore, diff_unsorted
 from eplasty.result import Result
 from eplasty.conditions import Equals
 from eplasty.relation.many_to_one import ManyToOne
@@ -18,14 +18,15 @@ class OneToMany(Relation):
     columns = []
 
     def __init__(
-        self, foreign_class, backref=None, on_update=NO_ACTION,
-        on_delete=NO_ACTION, fmt=LIST, **kwattrs
+        self, foreign_class, backref=None, dependent=False, fmt=LIST,
+        **kwattrs
     ):
         self.prepared = False
 
         self.foreign_class = foreign_class
         self.backref = backref
         self.fmt = fmt
+        self.dependent = dependent
 
         super(OneToMany, self).__init__(**kwattrs)
 
@@ -48,7 +49,9 @@ class OneToMany(Relation):
         if self.backref not in (f.name for f in self.foreign_class.fields):
             self.foreign_field = self.foreign_class.add_field(
                 self.backref,
-                ManyToOne(foreign_class = self.owner_class)
+                ManyToOne(
+                    foreign_class=self.owner_class, dependent=self.dependent
+                ),
             )
 
     def __set__(self, inst, v):
@@ -58,6 +61,8 @@ class OneToMany(Relation):
         added, deleted = diff_unsorted(prev, v) #@UnusedVariable
         for obj in added:
             setattr(obj, self.backref, inst)
+        for obj in deleted:
+            setattr(obj, self.backref, None)
         inst._current[self.name] = v
 
     def get_c_vals(self, dict_):
