@@ -14,6 +14,7 @@ setup(
       from PostgreSQL features.""",
       
       install_requires = ['psycopg2>=2.4.1'],
+      setup_requires = ['nose>=1.0', 'nose-cov>=1.0'],
       package_dir = {'': 'src'},
       packages = ['eplasty'],
 )
