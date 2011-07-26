@@ -50,11 +50,11 @@ and are able to flush them to database
                 self.nopk_objects[type(o).__table_name__].append(o)
 
     def flush(self):
-        from eplasty.object.const import NEW, MODIFIED, UPDATED, UNCHANGED
+        from eplasty.object.const import UNCHANGED, DELETED
         cursor = self.cursor()
         queue = self.objects[:]
         for o in queue_iterator(queue):
-            if o._status in [NEW, MODIFIED, UPDATED] and not o._flushed:
+            if o._status != UNCHANGED and not o._flushed:
                 if o._has_unflushed_dependencies():
                     queue.append(o)
                     continue
@@ -73,7 +73,7 @@ and are able to flush them to database
 
         self.connection.commit()
         for o in self.objects:
-            if o._flushed:
+            if o._flushed and o._status != DELETED:
                 o._status = UNCHANGED
                 o._flushed = False
 

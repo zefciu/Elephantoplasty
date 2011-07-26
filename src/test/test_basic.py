@@ -4,6 +4,7 @@ from eplasty import Object
 from eplasty.ctx import set_context, start_session, commit, add, get_connection
 from .util import get_test_conn
 from eplasty.object import NotFound, TooManyFound
+from eplasty.object.exc import LifecycleError
 
 class Test(unittest.TestCase):
     """
@@ -96,6 +97,15 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
     def test_too_many(self):
         """Test a get() finding too much"""
         self.assertRaises(TooManyFound, lambda: self.Knight.get(title = 'Sir'))
+        
+    def test_deletion(self):
+        """Test a correct deletion behaviour"""
+        k = self.Knight.get(2)
+        k.delete()
+        self.assertRaises(LifecycleError, lambda: k.name)
+        commit()
+        ks = list(self.Knight.find())
+        self.assertEqual(len(ks), 3)
 
 if __name__ == "__main__":
     unittest.main()

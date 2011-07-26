@@ -1,4 +1,6 @@
-from eplasty.object.const import MODIFIED, UNCHANGED, UPDATED
+from eplasty.object.const import DELETED, UNCHANGED, UPDATED, MODIFIED
+from eplasty.object.exc import LifecycleError
+
 class Field(object):
     """
     Fields are high-level representation of data stored in Objects.
@@ -13,6 +15,8 @@ class Field(object):
             self._default = kwargs['default']
 
     def __get__(self, inst, cls):
+        if inst._status == DELETED:
+            raise LifecycleError('Cannot access deleted object')
         try:
             return inst._current[self.name]
         except KeyError:

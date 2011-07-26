@@ -30,12 +30,10 @@ def prepare_col(col):
     """Checks if the given column is a tuple and reformats it to fit
     PostgresSQL syntax"""
     if isinstance(col, tuple):
-        return '({0})'.format(','.join(col))
+        return '({0})'.format(','.join((c.name for c in col)))
     else:
-        return col
-    
-    
-    
+        return col.name
+
 class queue_iterator(object):
     """This list iterator uses ``pop()`` to iterate over a list, so it empties
     a list and allows to append stuff to the list while iterating"""

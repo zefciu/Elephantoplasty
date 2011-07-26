@@ -9,6 +9,8 @@ from eplasty.result import Result
 from .meta import ObjectMeta
 from .exc import NotFound, TooManyFound
 from .const import NEW, MODIFIED
+from eplasty.object.const import DELETED
+from eplasty.util import prepare_col
 
 class Object(object):
     """Parent class for all eplasty Object classes"""
@@ -88,7 +90,21 @@ class Object(object):
                 self.__table_name__, col_names
             ), col_values + [pk]
         )
-    
+        
+    def _do_delete(self, session, cursor):
+        """Performs the actual deletion from database"""
+        cursor.execute(
+            'DELETE FROM {0} WHERE {1} = %s'.format(
+                self.__table_name__,
+                prepare_col(type(self).get_pk()),
+            ),
+            [self.get_pk_value()],
+        )
+
+    def delete(self):
+        """Marks this object as deleted"""
+        self._status = DELETED
+
     def flush(self, session, cursor):
         """
 Flush this object to database using given cursor
@@ -97,7 +113,10 @@ Flush this object to database using given cursor
             self._flush_new(session, cursor)
         elif self._status == MODIFIED:
             self._flush_modified(session, cursor)
-            
+        elif self._status == DELETED:
+            self._do_delete(session, cursor)
+        
+
     
     @classmethod
     def _get_column_names(cls, all = False):
