@@ -66,6 +66,14 @@ class Test(unittest.TestCase):
         meal.ingredients = meal.ingredients[1:]
         self.assertEqual(ing.meal, None)
 
+    def test_remove(self):
+        """Testing the behavior when we pop an element from list"""
+        ep.start_session()
+        meal = self.Meal.get(1)
+        ing = meal.ingredients[0]
+        self.assertEqual(ing.meal, meal)
+        meal.ingredients.pop(0)
+        self.assertEqual(ing.meal, None)
 
 
 if __name__ == "__main__":
