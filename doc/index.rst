@@ -9,7 +9,11 @@ Welcome to Elephantoplasty's documentation!
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 2
+
+    introduction
+    basics/index
+    advanced/index
 
 Indices and tables
 ==================
