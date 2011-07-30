@@ -1,10 +1,13 @@
 ----------------------------------------
-First steps with Elephantoplasty
+Sneak peek at Elephantoplasty code
 ----------------------------------------
 
 Let's start our tutorial creating an empty PostgresSQL database. Let's assume
 it's on the local machine, it's called "eptest" and it's owned by user 
 "eptester" with password "secret". No let's play a little with it:
+
+.. highlight:: python
+    :linenothreshold: 5
 
 .. testcode::
 
@@ -14,7 +17,6 @@ it's on the local machine, it's called "eptest" and it's owned by user
         host='localhost', database='eptest', user='eptester', password='secret'
     )
 
-    # Then we create some records
     ep.start_session()
     
     class Knight(ep.Object):
@@ -30,11 +32,11 @@ it's on the local machine, it's called "eptest" and it's owned by user
 
     galahad = Knight(name='Galahad', nickname='The Pure')
     arthur = Knight(title='King', name='Arthur')
-    lancelot = Knight(name='Lancelot')
+    lancelot = Knight()
+    lancelot.name = 'Lancelot'
     ep.add(galahad, arthur, lancelot)
     ep.commit()
     
-    # And then we retrieve them
     ep.start_session()
     knights = Knight.find()
     for k in knights:

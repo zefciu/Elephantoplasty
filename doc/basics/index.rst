@@ -6,4 +6,4 @@ Elephantoplasty basic tutorial
     :maxdepth: 2
 
     what_here
-    first_steps
+    first_steps/index
