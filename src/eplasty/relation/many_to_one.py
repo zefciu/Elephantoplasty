@@ -19,6 +19,7 @@ class ManyToOne(Relation):
         if self.ColType == BigSerial:
             self.ColType = BigInt
         self.dependent = dependent
+        self.orphaned = dependent
         on_update = on_delete = CASCADE if dependent else SET_NULL
         self.on_update = on_update
         self.on_delete = on_delete
@@ -26,11 +27,12 @@ class ManyToOne(Relation):
         super(ManyToOne, self).__init__(**kwargs)
         
     def _is_compatible(self, value):
-        if self.dependent:
-            return isinstance(value, self.foreign_class)
-        else:
-            return isinstance(value, (self.foreign_class, type(None)))
-            
+        return isinstance(value, (self.foreign_class, type(None)))
+
+    def orphan(self, inst):
+        inst._current[self.name] = NULL
+        self.orphaned = True
+        inst.set_orphan_status
     
     @property
     def constraints(self):
@@ -73,6 +75,11 @@ class ManyToOne(Relation):
         if isinstance(inst._current[self.name], LazyQuery):
             inst._current[self.name] = inst._current[self.name]()
         return inst._current[self.name]
+
+    def __set__(self, inst, v):
+        super(ManyToOne, self).__set__(inst, v)
+        self.orphaned = False
+        inst.check_orphan_status
 
     def get_dependencies(self, dict_):
         if dict_[self.name] is not None:

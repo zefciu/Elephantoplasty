@@ -25,7 +25,6 @@ class OneToMany(Relation):
     Many-to-one relationship on the 'one' side
     '''
 
-    pseudo = True
     compat_types = [list, set]
     columns = []
 

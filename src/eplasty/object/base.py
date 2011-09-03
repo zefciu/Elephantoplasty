@@ -8,7 +8,7 @@ from eplasty.result import Result
 
 from .meta import ObjectMeta
 from .exc import NotFound, TooManyFound
-from .const import NEW, MODIFIED
+from .const import NEW, MODIFIED, ORPHANED
 from eplasty.object.const import DELETED
 from eplasty.util import prepare_col
 
@@ -100,6 +100,19 @@ class Object(object):
             ),
             [self.get_pk_value()],
         )
+
+    def set_orphan_status(self):
+        """Sets the status to ORPHANED if it makes sense"""
+        if self._status != DELETED:
+            self._status = ORPHANED
+
+    def check_orphan_status(self):
+        """Checks if the object is still an orphan and deletes the orphan status
+        appropriately"""
+        for f in self.fields:
+            if f.orphaned:
+                self._status = ORPHANED
+        self._status = MODIFIED
 
     def delete(self):
         """Marks this object as deleted"""
