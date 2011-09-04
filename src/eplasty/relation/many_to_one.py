@@ -29,11 +29,6 @@ class ManyToOne(Relation):
     def _is_compatible(self, value):
         return isinstance(value, (self.foreign_class, type(None)))
 
-    def orphan(self, inst):
-        inst._current[self.name] = NULL
-        self.orphaned = True
-        inst.set_orphan_status
-    
     @property
     def constraints(self):
         return [self.constraint]
@@ -80,8 +75,11 @@ class ManyToOne(Relation):
 
     def __set__(self, inst, v):
         super(ManyToOne, self).__set__(inst, v)
-        self.orphaned = False
-        inst.check_orphan_status
+        if v is None and self.dependent:
+            self.orphaned = True
+        else:
+            self.orphaned = False
+        inst.check_orphan_status()
 
     def get_dependencies(self, dict_):
         if dict_[self.name] is not None:

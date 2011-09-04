@@ -8,6 +8,7 @@ class Field(object):
     Fields are data descriptors"""
 
     columns = []
+    orphaned = False
 
     def __init__(self, *args, **kwargs):
         self.kwargs = kwargs

@@ -25,11 +25,11 @@ DONE
 #. Simplest one-to-many and many-to-one
 #. EAFP table creation
 #. Simplest identities
+#. Dependent and independent relations
 
 TODO
 ------------------
 
-#. Dependent and independent relations
 #. Joined loading strategy
 #. Many-to-many
 #. Advanced primary keys

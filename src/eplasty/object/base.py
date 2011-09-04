@@ -112,7 +112,9 @@ class Object(object):
         for f in self.fields:
             if f.orphaned:
                 self._status = ORPHANED
-        self._status = MODIFIED
+                return
+        if self._status == ORPHANED:
+            self._status = MODIFIED
 
     def delete(self):
         """Marks this object as deleted"""
@@ -126,7 +128,7 @@ Flush this object to database using given cursor
             self._flush_new(session, cursor)
         elif self._status == MODIFIED:
             self._flush_modified(session, cursor)
-        elif self._status == DELETED:
+        elif self._status in [DELETED, ORPHANED]:
             self._do_delete(session, cursor)
         
 
