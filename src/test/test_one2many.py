@@ -19,7 +19,7 @@ class Test(unittest.TestCase):
 
         class Meal(ep.Object):
             name = ep.f.CharacterVarying(20)
-            ingredients = ep.rel.OneToMany(Ingredient)
+            ingredients = ep.rel.OneToMany(Ingredient, dependent=False)
 
         for meal_name, ingredient_set in [
             ('meal1', ['spam', 'bacon']),
@@ -74,6 +74,18 @@ class Test(unittest.TestCase):
         self.assertEqual(ing.meal, meal)
         meal.ingredients.pop(0)
         self.assertEqual(ing.meal, None)
+
+    def test_non_dependent(self):
+        """Test if the orphaned object persists"""
+        ep.start_session()
+        meal = self.Meal.get(1)
+        ing = meal.ingredients[0]
+        ing_id = ing.get_pk_value()
+        meal.ingredients.pop(0)
+        ep.commit()
+        ep.start_session()
+        ing2 = self.Ingredient.get(ing_id)
+        self.assertEqual(ing2.meal, None)
 
 
 if __name__ == "__main__":

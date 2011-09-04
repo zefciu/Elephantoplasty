@@ -59,11 +59,13 @@ class ManyToOne(Relation):
         return self
 
     def hydrate(self, ins, col_vals, dict_, session):
-        dict_[self.name] = LazyQuery(
-            self.foreign_class,
-            'get',
-            col_vals[self.column.name]
-        )
+        col_val = col_vals[self.column.name]
+        if col_val is not None:
+            dict_[self.name] = LazyQuery(
+                self.foreign_class, 'get', col_val
+            )
+        else:
+            dict_[self.name] = None
         
     def get_c_vals(self, dict_):
         return {
