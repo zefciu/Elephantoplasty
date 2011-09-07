@@ -11,6 +11,7 @@ from .exc import NotFound, TooManyFound
 from .const import NEW, MODIFIED, ORPHANED
 from eplasty.object.const import DELETED
 from eplasty.util import prepare_col
+from eplasty.query import SelectQuery
 
 class Object(object):
     """Parent class for all eplasty Object classes"""
@@ -156,15 +157,11 @@ Flush this object to database using given cursor
     def _get_query(cls, condition):
         """Returns tuple to be executed for this class and given
         ``condition``"""
-        cond_string, cond_args = condition.render()
-        return(
-            'SELECT {col_names} FROM {tname} WHERE {conds}'.format(
-                col_names = cls._get_column_names(),
-                tname = cls.__table_name__,
-                conds = cond_string,
-            ),
-            cond_args,
-        )
+        return SelectQuery(
+            cls.__table_name__,
+            columns = cls.columns,
+            condition = condition
+        ).render()
         
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):

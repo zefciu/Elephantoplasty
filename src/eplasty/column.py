@@ -7,10 +7,8 @@ class Column(object):
     """
     __slots__ = [
         'name', 'pgtype', 'length', 'attrs', 'owner_class',
-        'owner', 'pseudo', 'compat_types'
+        'owner'
     ]
-
-    pseudo = False
 
     def __init__(
         self, name=None, length=None, null=True, default=False,
@@ -41,22 +39,8 @@ class Column(object):
                 return True
         return False
 
-    def _set_value(self, v, inst, cls):
-        from eplasty.object.const import MODIFIED, UNCHANGED, UPDATED
-        if not self._is_compatible(v):
-            raise TypeError(('Python type {0} is not compatible with column'
-                'type {1}').format(type(v), type(self)))
-        inst._current[self.name] = v
-        if inst._status in [UNCHANGED, UPDATED]:
-            inst._status = MODIFIED
-        
-    def _get_value(self, inst, cls):
-        return inst._current[self.name]
-
     @property
     def declaration(self):
-        if self.pseudo:
-            return None
         return "{name} {pgtype}{length} {pgattrs}".format(
             name = self.name,
             pgtype = self.pgtype,
@@ -64,10 +48,14 @@ class Column(object):
             pgattrs = ' '.join(a[0] for a in self.pgattrs),
         ), sum([a[1] for a in self.pgattrs], [])
 
-    def bind(self, cls, name):
+    @property
+    def full_name(self):
+        """The full, unambiguos name of this column"""
+        return '.'.join([self.owner_class.__table_name__, self.name])
+
+    def bind(self, cls):
         """Adds owner class and name to the column and returns self"""
         self.owner_class = cls
-        self.name = name
         return self
 
     def hydrate(self, value, session):

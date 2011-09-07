@@ -48,6 +48,8 @@ selecting a table name"""
         cls.__pk__ = dict_['__pk__']
         dict_.pop('__pk__', None)
         cls.columns = sum((f.columns for f in fields), [])
+        for col in cls.columns:
+            col.bind(cls)
         cls.inh_columns = sum([
             p_cls.columns for p_cls in cls.parent_classes
         ], [])
@@ -112,6 +114,8 @@ selecting a table name"""
     def add_field(cls, name, field): #@NoSelf
         field.bind_class(cls, name)
         cls.fields.append(field)
+        for column in field.columns:
+            column.bind(cls)
         cls.columns += field.columns
         setattr(cls, name, field)
         return field
