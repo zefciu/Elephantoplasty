@@ -48,6 +48,7 @@ and are able to flush them to database
             else:
                 self.nopk_objects.setdefault(type(o).__table_name__, [])
                 self.nopk_objects[type(o).__table_name__].append(o)
+            o.bind_session(self)
 
     def flush(self):
         from eplasty.object.const import UNCHANGED, DELETED

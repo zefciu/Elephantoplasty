@@ -38,6 +38,7 @@ class Object(object):
         self = super(Object, cls).__new__(cls)
         self._current = {}
         self._initial = {}
+        self.session = None
         return self
 
     @property
@@ -227,3 +228,9 @@ Flush this object to database using given cursor
                 if d._status == NEW and not d._flushed:
                     result.append(d)
         return result or False
+
+    def bind_session(self, session):
+        """Sets the current session"""
+        self.session = session
+        for f in self.fields:
+            f.bind_session(session)

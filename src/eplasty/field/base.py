@@ -11,7 +11,7 @@ class Field(object):
     orphaned = False
 
     def __init__(self, *args, **kwargs):
-        self.kwargs = kwargs
+#        self.kwargs = kwargs
         if 'default' in kwargs:
             self._default = kwargs['default']
 
@@ -45,8 +45,8 @@ class Field(object):
     def bind_class(self, cls, name):
         self.owner_class = cls
         self.name = name
-        self.kwargs['owner_class'] = cls
-        self.kwargs['name'] = name
+#         self.kwargs['owner_class'] = cls
+#         self.kwargs['name'] = name
         return self
 
     constraints = []
@@ -60,3 +60,7 @@ class Field(object):
         containing this field
         """
         return []
+
+    def bind_session(self, session):
+        """Do whatever needed when owner is added to session. Default NOP"""
+        pass
