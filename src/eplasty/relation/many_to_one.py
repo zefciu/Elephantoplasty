@@ -2,6 +2,7 @@ from .const import CASCADE, SET_NULL
 from .base import Relation
 from eplasty.lazy import LazyQuery
 from eplasty.column import BigSerial, BigInt
+from eplasty import conditions as cond
 
 
 class ManyToOne(Relation):
@@ -69,6 +70,8 @@ class ManyToOne(Relation):
         }
 
     def __get__(self, inst, cls):
+        if inst is None:
+            return self
         if isinstance(inst._current[self.name], LazyQuery):
             inst._current[self.name] = inst._current[self.name]()
         return inst._current[self.name]
@@ -84,4 +87,7 @@ class ManyToOne(Relation):
     def get_dependencies(self, dict_):
         if dict_[self.name] is not None:
             yield dict_[self.name]
+
+    def __eq__(self, other):
+        return cond.Equals(self.column.name, other.get_pk_value())
             

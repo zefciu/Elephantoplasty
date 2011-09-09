@@ -29,7 +29,7 @@ class Test(unittest.TestCase):
         add(life)
         add(grail)
         for c in [
-            ('Brain', life),
+            ('Brian', life),
             ('Patsy', grail),
             ('Arthur', grail),
         ]:
@@ -57,6 +57,13 @@ class Test(unittest.TestCase):
         start_session()
         c = self.Character.get(name = 'Patsy')
         self.assertEqual(c.movie.title, 'MP & the Holy Grail')
+
+    def test_find_by_related(self):
+        """Test finding by related object"""
+        start_session()
+        life = self.Movie.get(title = 'Life of Brian')
+        characters = self.Character.find(self.Character.movie == life)
+        self.assertEqual(list(characters)[0].name, 'Brian')
 
 
 if __name__ == "__main__":
