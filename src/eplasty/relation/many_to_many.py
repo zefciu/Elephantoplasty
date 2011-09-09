@@ -74,11 +74,8 @@ class ManyToMany(Relation):
             new_primary = self.PrimaryTable()
             setattr(new_primary, self.owner_fk, inst)
             setattr(new_primary, self.foreign_fk, obj)
-            self.temporary.append(new_primary)
+            inst.add(new_primary)
         if inst.session is not None:
-            inst.session.add(*self.temporary)
-            self.temporary = []
-            
             for obj in deleted:
                 try:
                     to_delete = inst.session.get(

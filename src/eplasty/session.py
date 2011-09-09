@@ -63,7 +63,6 @@ and are able to flush them to database
                     o.flush(self, cursor)
                     o._flushed = True
                 except ProgrammingError as e:
-                    print e.pgcode
                     if e.pgcode == UNDEFINED_TABLE:
                         cursor.connection.commit()
                         type(o).create_table(cursor)

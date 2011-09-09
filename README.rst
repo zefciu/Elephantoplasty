@@ -23,15 +23,16 @@ DONE
 #. Simple tables.
 #. Inheritance.
 #. Simplest one-to-many and many-to-one
+#. Many-to-many
 #. EAFP table creation
 #. Simplest identities
 #. Dependent and independent relations
+#. Some documentation
 
 TODO
 ------------------
 
 #. Joined loading strategy
-#. Many-to-many
 #. Advanced primary keys
 #. EAFP table migration
 #. Concurrency control
@@ -39,4 +40,4 @@ TODO
 #. Advanced identities
 #. List-like and dict-like relations
 #. Trees
-#. Documentation
+#. Full documentation

@@ -39,6 +39,7 @@ class Object(object):
         self._current = {}
         self._initial = {}
         self.session = None
+        self.temporary = []
         return self
 
     @property
@@ -58,14 +59,14 @@ class Object(object):
             for cname, cval in cvals.items():
                 col_names.append(cname)
                 col_values.append(cval)
-        print cursor.mogrify(
-            'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
-                type(self).__table_name__, ', '.join(col_names),
-                ', '.join(['%s'] * len(col_names)),
-                ','.join(type(self).__pk__)
-            ), 
-            col_values
-        )
+        # print cursor.mogrify(
+        #     'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
+        #         type(self).__table_name__, ', '.join(col_names),
+        #         ', '.join(['%s'] * len(col_names)),
+        #         ','.join(type(self).__pk__)
+        #     ), 
+        #     col_values
+        # )
         cursor.execute(
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),
@@ -242,3 +243,13 @@ Flush this object to database using given cursor
         self.session = session
         for f in self.fields:
             f.bind_session(session)
+        session.add(*self.temporary)
+        self.temporary = []
+
+    def add(self, *os):
+        """Adds an object to this object's session or to a temporary storage
+        (to be added when adding this one"""
+        if self.session is not None:
+            self.session.add(*os)
+        else:
+            self.temporary += os
