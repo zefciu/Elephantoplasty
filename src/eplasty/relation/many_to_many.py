@@ -42,10 +42,10 @@ class ManyToMany(Relation):
             self.owner_fk = self.owner_fk + '1'
             self.foreign_fk = self.foreign_fk + '2'
         primary_table_clsname = (
-            self.name.capitalize() + self.foreign_class.__name__
+            self.owner_class.__name__ + self.foreign_class.__name__
         )
         primary_table_name = '{0}_{1}'.format(
-            self.name, self.foreign_class.__table_name__
+            self.owner_class.__table_name__, self.foreign_class.__table_name__
         )
             
         self.PrimaryTable = ObjectMeta(
@@ -53,7 +53,7 @@ class ManyToMany(Relation):
                 '__table_name__': primary_table_name,
                 self.owner_fk: ManyToOne(self.owner_class),
                 self.foreign_fk: ManyToOne(self.foreign_class),
-                '__pk__': (self.owner_fk, self.foreign_fk),
+                '__pk__': (self.owner_fk + '_id', self.foreign_fk + '_id'),
             }
         )
         
@@ -72,8 +72,8 @@ class ManyToMany(Relation):
         self.temporary = []
         for obj in added:
             new_primary = self.PrimaryTable()
-            setattr(new_primary, self.owner_fk, inst.get_pk_value())
-            setattr(new_primary, self.foreign_fk, obj.get_pk_value())
+            setattr(new_primary, self.owner_fk, inst)
+            setattr(new_primary, self.foreign_fk, obj)
             self.temporary.append(new_primary)
         if inst.session is not None:
             inst.session.add(*self.temporary)
@@ -92,7 +92,7 @@ class ManyToMany(Relation):
 
     def __get__(self, inst, cls):
         if isinstance(inst._current[self.name], LazyManyToMany):
-            inst._current[self.name] = list(self.name)
+            inst._current[self.name] = list(inst._current[self.name])
         return inst._current[self.name]
 
     def __set__(self, inst, v):

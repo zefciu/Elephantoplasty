@@ -24,12 +24,13 @@ class LazyManyToMany(object):
         self.owner_id = owner_id
         self.primary_result = self.relation.PrimaryTable.find(
             None,
-            ep.conditions.Equals(self.relation.owner_fk, self.owner_id)
+            ep.conditions.Equals(self.relation.owner_fk + '_id', self.owner_id)
         )
 
     def __iter__(self):
+        self.primary_iter = iter(self.primary_result)
         return self
 
     def next(self):
-        primary = next(self.result)
+        primary = next(self.primary_iter)
         return getattr(primary, self.relation.foreign_fk)

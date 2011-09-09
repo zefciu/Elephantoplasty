@@ -58,6 +58,14 @@ class Object(object):
             for cname, cval in cvals.items():
                 col_names.append(cname)
                 col_values.append(cval)
+        print cursor.mogrify(
+            'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
+                type(self).__table_name__, ', '.join(col_names),
+                ', '.join(['%s'] * len(col_names)),
+                ','.join(type(self).__pk__)
+            ), 
+            col_values
+        )
         cursor.execute(
             'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
                 type(self).__table_name__, ', '.join(col_names),

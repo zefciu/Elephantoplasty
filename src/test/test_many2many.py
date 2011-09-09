@@ -34,10 +34,12 @@ class Test(unittest.TestCase):
         ep.commit()
 
     def tearDown(self):
+        self.connection.rollback()
         cur = self.connection.cursor()
         try:
-            cur.execute('DROP TABLE ingredients;')
-            cur.execute('DROP TABLE meals;')
+            cur.execute('DROP TABLE ingredients CASCADE;')
+            cur.execute('DROP TABLE meals CASCADE;')
+            cur.execute('DROP TABLE meals_ingredients CASCADE;')
             self.connection.commit()
         except ProgrammingError:
             pass
