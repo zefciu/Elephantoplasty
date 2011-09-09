@@ -4,6 +4,9 @@ class Condition(object):
     """Base class for conditions"""
     def render(self):
         raise NotImplementedError
+
+    def __and__(self, other):
+        return And(self, other)
     
 class All():
     """Get all rows"""

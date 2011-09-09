@@ -15,10 +15,20 @@ class Test(unittest.TestCase):
         self.assertEqual(c.render(), ('score = %s', (3,)))
         
     def test_and(self):
+        """Testing AND as class"""
         x = Equals('name', 'Sir Lancelot')
         y = Equals('score', 3)
         self.assertEqual(
             And(x, y).render(),
+            ('(name = %s) AND (score = %s)', ('Sir Lancelot', 3))
+        )
+
+    def test_and_operator(self):
+        """Testing AND as operator"""
+        x = Equals('name', 'Sir Lancelot')
+        y = Equals('score', 3)
+        self.assertEqual(
+            (x & y).render(),
             ('(name = %s) AND (score = %s)', ('Sir Lancelot', 3))
         )
         
