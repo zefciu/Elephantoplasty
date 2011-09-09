@@ -16,6 +16,8 @@ class Field(object):
             self._default = kwargs['default']
 
     def __get__(self, inst, cls):
+        if inst is None:
+            return self
         if inst._status == DELETED:
             raise LifecycleError('Cannot access deleted object')
         try:

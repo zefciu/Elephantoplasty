@@ -96,8 +96,8 @@ class OneToMany(Relation):
 
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = LazyQuery(
-            self.foreign_class, 'find', session,
+            self.foreign_class, 'find', 
             Equals(
                 self.foreign_field.column.name, inst.get_pk_value()
-            )
+            ), session = session
         )

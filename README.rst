@@ -32,12 +32,11 @@ DONE
 TODO
 ------------------
 
-#. Joined loading strategy
-#. Advanced primary keys
-#. EAFP table migration
-#. Concurrency control
-#. Conflict detection
-#. Advanced identities
-#. List-like and dict-like relations
 #. Trees
+#. List-like and dict-like relations
+#. Advanced primary keys
+#. Concurrency control and conflict detection
+#. Advanced identities
+#. EAFP table migration
+#. Joined loading strategy
 #. Full documentation

@@ -58,7 +58,7 @@ class ManyToMany(Relation):
         )
         
     def hydrate(self, inst, col_vals, dict_, session):
-        dict_[self.name] = LazyManyToMany(self, inst.get_pk_value())
+        dict_[self.name] = LazyManyToMany(self, inst.session, inst.get_pk_value())
 
     def __set__(self, inst, v):
         if isinstance(v, Result):

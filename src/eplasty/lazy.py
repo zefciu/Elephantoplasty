@@ -19,12 +19,12 @@ class LazyQuery(object):
 
 class LazyManyToMany(object):
     """This object will act as an iterator for ManyToMany relation"""
-    def __init__(self, relation, owner_id):
+    def __init__(self, relation, session, owner_id):
         self.relation = relation
         self.owner_id = owner_id
         self.primary_result = self.relation.PrimaryTable.find(
-            None,
-            ep.conditions.Equals(self.relation.owner_fk + '_id', self.owner_id)
+            ep.conditions.Equals(self.relation.owner_fk + '_id', self.owner_id),
+            session = session,
         )
 
     def __iter__(self):

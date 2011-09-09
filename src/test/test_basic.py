@@ -58,6 +58,7 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         self.assertEqual(k.score, 20)
         
     def test_find(self):
+        """Basic test for find() classmethod with keyword syntax"""
         knights = self.Knight.find(title = 'Sir')
         names = set((k.name for k in knights))
         self.assertEqual(names, set(['Lancelot', 'Galahad', 'Robin']))
@@ -66,6 +67,14 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         objects = knights2.fetch(10)
         self.assertEqual(len(objects), 4)
         knights2.cursor.close()
+
+    def test_find_alternative(self):
+        """Test finding with == syntax"""
+        start_session()
+        knights = self.Knight.find(self.Knight.title == 'Sir')
+        names = set((k.name for k in knights))
+        self.assertEqual(names, set(['Lancelot', 'Galahad', 'Robin']))
+        
         
         
     def test_deft(self):

@@ -199,11 +199,12 @@ Flush this object to database using given cursor
             raise TooManyFound("Found more than one row")
     
     @classmethod
-    def find(cls, session = None, *args, **kwargs):
+    def find(cls, *args, **kwargs):
         """
         Execute the query on this object class and return a ``Result`` object.
         """
-        session = get_session(session)
+        s = kwargs.pop('session', None)
+        session = get_session(s)
         tmp_cursor = session.cursor()
         condition = cls._get_conditions(*args, **kwargs)
         
