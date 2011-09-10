@@ -59,7 +59,7 @@ class SelectQuery(object):
         return (
             (
                 'SELECT {select_clause} FROM {from_clause}'
-                ' WHERE {where_clause}'
+                ' WHERE {where_clause};'
             ).format(**locals()),
             where_vars
         )
