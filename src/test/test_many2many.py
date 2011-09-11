@@ -48,3 +48,17 @@ class Test(unittest.TestCase):
         ep.start_session()
         meal = self.Meal.get(1)
         self.assertEqual(meal.ingredients[1].name, 'bacon') 
+
+    def test_add(self):
+        ep.start_session()
+        meal = self.Meal.get(1)
+        eggs = self.Ingredient.get(2)
+        meal.ingredients.append(eggs)
+        ep.commit()
+        ep.start_session()
+        meal = self.Meal.get(1)
+        self.assertEqual(
+            set([i.name for i in meal.ingredients]),
+            set(['spam', 'eggs', 'bacon'])
+        )
+        

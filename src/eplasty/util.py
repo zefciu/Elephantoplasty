@@ -82,5 +82,16 @@ class _TraceableOverride(object):
     def __get__(self, inst, type):
         return types.MethodType(self, inst, type)
 
-for method_name in ['pop', 'insert']:
+for method_name in ['pop', 'insert', 'append']:
     setattr(TraceableList, method_name, _TraceableOverride(method_name))
+
+class RelationList(TraceableList):
+    """List subclass for managing relationship collections"""
+    def __init__(self, owner, inst, it):
+        self.inst = inst
+        self.owner = owner
+        super(RelationList, self).__init__(it)
+
+    def callback(self, was_, is_):
+        self.owner._resolve_diff(self.inst, was_, is_)
+

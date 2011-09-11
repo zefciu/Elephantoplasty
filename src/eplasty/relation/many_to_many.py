@@ -1,7 +1,9 @@
 import eplasty as ep
 from .const import LIST
 from .base import Relation
-from eplasty.util import clsname2tname, camel2underscore, diff_unsorted
+from eplasty.util import (
+    clsname2tname, camel2underscore, diff_unsorted, RelationList
+)
 from eplasty.object.meta import ObjectMeta
 from eplasty.result import Result
 from eplasty.object.base import NotFound
@@ -90,6 +92,9 @@ class ManyToMany(Relation):
     def __get__(self, inst, cls):
         if isinstance(inst._current[self.name], LazyManyToMany):
             inst._current[self.name] = list(inst._current[self.name])
+        inst._current[self.name] = RelationList(
+            self, inst, inst._current[self.name]
+        )
         return inst._current[self.name]
 
     def __set__(self, inst, v):

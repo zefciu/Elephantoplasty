@@ -1,24 +1,12 @@
 from .const import LIST
 
-from eplasty.util import camel2underscore, diff_unsorted, TraceableList
+from eplasty.util import camel2underscore, diff_unsorted, RelationList
 from eplasty.result import Result
 from eplasty.conditions import Equals
 from eplasty.relation.many_to_one import ManyToOne
 
 from .base import Relation
 from eplasty.lazy import LazyQuery
-
-class O2MList(TraceableList):
-    """The traceable list subclass to manage collections"""
-
-    def __init__(self, owner, inst, it):
-        self.inst = inst
-        self.owner = owner
-        super(O2MList, self).__init__(it)
-
-    def callback(self, was_, is_):
-        self.owner._resolve_diff(self.inst, was_, is_)
-
 
 class OneToMany(Relation):
     '''
@@ -89,7 +77,7 @@ class OneToMany(Relation):
         if isinstance(inst._current[self.name], LazyQuery):
             inst._current[self.name] = inst._current[self.name]()
             if self.fmt == LIST:
-                inst._current[self.name] = O2MList(
+                inst._current[self.name] = RelationList(
                     self, inst, inst._current[self.name]
                 )
         return inst._current[self.name]
