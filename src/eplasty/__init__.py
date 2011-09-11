@@ -1,7 +1,11 @@
-from .ctx import *
+"""Elephantoplasty main package"""
+from eplasty.ctx import (
+    connect, get_connection, get_cursor, set_context, del_context,
+    start_session, commit, add, get_session
+)
 
-from .object.base import Object
+from eplasty.object.base import Object
 
-import field as f
-import column as col
-import relation as rel
+import eplasty.field as f
+import eplasty.column as col
+import eplasty.relation as rel
