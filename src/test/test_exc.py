@@ -24,7 +24,7 @@ class Test(unittest.TestCase):
         
     def test_base_condition(self):
         """Trying to render base condition"""
-        self.assertRaises(NotImplementedError, lambda: Condition().render())
+        self.assertRaises(TypeError, lambda: Condition().render())
         
     def test_invalid_column(self):
         """Trying to initialize a row with nonexistent column name"""

@@ -28,9 +28,11 @@ class LazyManyToMany(object):
         )
 
     def __iter__(self):
+        """Get an iterator. Doesn't reset!"""
         self.primary_iter = iter(self.primary_result)
         return self
 
     def next(self):
+        """Get next object"""
         primary = next(self.primary_iter)
         return getattr(primary, self.relation.foreign_fk)

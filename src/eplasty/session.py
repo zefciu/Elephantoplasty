@@ -1,3 +1,4 @@
+"""Session class definition"""
 from psycopg2 import ProgrammingError, InterfaceError
 from psycopg2.errorcodes import UNDEFINED_TABLE
 
@@ -23,13 +24,13 @@ and are able to flush them to database
     def _rollback(self):
         """Rollback the connection and unset ``flushed`` flags"""
         self.connection.rollback()
-        for o in self.objects:
-            o._flushed = False
+        for object_ in self.objects:
+            object_._flushed = False
 
     def close(self):
-        for c in self.cursors:
+        for cursor in self.cursors:
             try:
-                c.close()
+                cursor.close()
             except InterfaceError:
                 pass
 
@@ -38,34 +39,35 @@ and are able to flush them to database
         self.cursors.append(new_cur)
         return new_cur
 
-    def add(self, *os):
-        for o in os:
-            self.objects.append(o)
-            pk = o.get_pk_value()
-            if pk:
-                self.pk_objects.setdefault(type(o).__table_name__, {})
-                self.pk_objects[type(o).__table_name__][pk] = o
+    def add(self, *objects):
+        for object_ in objects:
+            self.objects.append(object_)
+            primary_key = object_.get_pk_value()
+            if primary_key:
+                self.pk_objects.setdefault(type(object_).__table_name__, {})
+                self.pk_objects[type(object_).__table_name__][primary_key] =\
+                        object_
             else:
-                self.nopk_objects.setdefault(type(o).__table_name__, [])
-                self.nopk_objects[type(o).__table_name__].append(o)
-            o.bind_session(self)
+                self.nopk_objects.setdefault(type(object_).__table_name__, [])
+                self.nopk_objects[type(object_).__table_name__].append(object_)
+            object_.bind_session(self)
 
     def flush(self):
         from eplasty.object.const import UNCHANGED, DELETED
         cursor = self.cursor()
         queue = self.objects[:]
-        for o in queue_iterator(queue):
-            if o._status != UNCHANGED and not o._flushed:
-                if o._has_unflushed_dependencies():
-                    queue.append(o)
+        for object_ in queue_iterator(queue):
+            if object_._status != UNCHANGED and not object_._flushed:
+                if object_._has_unflushed_dependencies():
+                    queue.append(object_)
                     continue
                 try:
-                    o.flush(self, cursor)
-                    o._flushed = True
-                except ProgrammingError as e:
-                    if e.pgcode == UNDEFINED_TABLE:
+                    object_.flush(self, cursor)
+                    object_._flushed = True
+                except ProgrammingError as err:
+                    if err.pgcode == UNDEFINED_TABLE:
                         cursor.connection.commit()
-                        type(o).create_table(cursor)
+                        type(object_).create_table(cursor)
                         self._rollback()
                         self.flush()
                         return

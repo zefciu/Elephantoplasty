@@ -1,3 +1,4 @@
+"""Objects that facilitate building various SQL Queries"""
 import eplasty as ep
 
 class SelectQuery(object):
@@ -14,19 +15,21 @@ class SelectQuery(object):
     __slots__ = ['from_', 'condition', 'columns', 'joins']
 
     def __init__(
-        self, from_, condition=ep.conditions.All(), columns='*', joins=[]
+        self, from_, condition=ep.conditions.All(), columns='*', joins=False
     ):
         self.from_ = from_
         self.condition = condition
         self.columns = columns
-        self.joins = joins
+        self.joins = joins or []
 
     def _render_columns(self):
         """Renders the SELECT clause"""
         if self.columns == '*':
             return '*'
         else:
-            return ','.join((self._get_column_name(c) for c in self.columns))
+            return ','.join((
+                self._get_column_name(column) for column in self.columns
+            ))
 
     def _get_column_name(self, c):
         """Renders a single column name (works on a column or a string)"""

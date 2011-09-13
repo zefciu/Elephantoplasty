@@ -1,4 +1,7 @@
+"""Results are iterable lazy wrappers around server-side cursor"""
+
 class ResultIterator(object):
+    """The iterator for Result"""
     def __init__(self, result):
         self.result = result
         self.cls = result.cls
