@@ -3,13 +3,14 @@ from .base import Relation
 from eplasty.lazy import LazyQuery
 from eplasty.column import BigSerial, BigInt
 from eplasty import conditions as cond
+from eplasty.util import clsname2tname
 
 
 class ManyToOne(Relation):
     """Many-to-one relationship on the 'many' side"""
     
     def __init__(
-        self, foreign_class, dependent=False, **kwargs
+        self, foreign_class, dependent=False, backref=None, **kwargs
     ):
         self.foreign_class = foreign_class
         self.foreign_pk = self.foreign_class.get_pk()
@@ -25,6 +26,7 @@ class ManyToOne(Relation):
         self.on_update = on_update
         self.on_delete = on_delete
         self.null = not dependent
+        self.backref = backref
         super(ManyToOne, self).__init__(**kwargs)
         
     def _is_compatible(self, value):
@@ -35,6 +37,7 @@ class ManyToOne(Relation):
         return [self.constraint]
 
     def bind_class(self, cls, name):
+        from eplasty.relation import OneToMany
         super(ManyToOne, self).bind_class(cls, name)
         length = self.foreign_pk.length
         name = self.name + '_id'
@@ -52,6 +55,10 @@ class ManyToOne(Relation):
             f_column=self.foreign_pk.name, on_update=self.on_update,
             on_delete = self.on_delete,
         )
+        self.backref = self.backref or clsname2tname(self.name)
+        self.foreign_class.add_field(self.backref, OneToMany(
+            cls, backref=name, dependent=dependent
+        ))
         return self
 
     def hydrate(self, ins, col_vals, dict_, session):
