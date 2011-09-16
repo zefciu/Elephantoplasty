@@ -54,9 +54,18 @@ class Test(unittest.TestCase):
             
 
     def test_get(self):
+        """Most basic test of finding related object"""
         start_session()
         c = self.Character.get(name = 'Patsy')
         self.assertEqual(c.movie.title, 'MP & the Holy Grail')
+
+    def test_backref(self):
+        """Testing if backref is correctly created"""
+        grail = self.Movie.get(title = 'MP & the Holy Grail')
+        self.assertEqual(
+            set((character.name for character in grail.characters)),
+            set(['Patsy', 'Arthur'])
+        )
 
     def test_find_by_related(self):
         """Test finding by related object"""

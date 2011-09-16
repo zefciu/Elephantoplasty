@@ -32,12 +32,9 @@ class OneToMany(Relation):
 
         super(OneToMany, self).__init__(**kwattrs)
 
-    def bind(self, cls, name):
+    def bind_class(self, cls, name):
         self.owner_class = cls
         self.name = name
-        if not self.backref:
-            self.backref = self.name
-            self.kwattrs['backref'] = self.backref
         return self
 
     def prepare(self): 
@@ -46,7 +43,13 @@ class OneToMany(Relation):
             self.owner_class.__name__
         )
         
-        if self.backref not in (f.name for f in self.foreign_class.fields):
+        self.foreign_field = None
+        for field in self.foreign_class.fields:
+            if field.name == self.backref:
+                self.foreign_field = field
+                break
+
+        if not self.foreign_field:
             self.foreign_field = self.foreign_class.add_field(
                 self.backref,
                 ManyToOne(

@@ -37,7 +37,6 @@ class ManyToOne(Relation):
         return [self.constraint]
 
     def bind_class(self, cls, name):
-        from eplasty.relation import OneToMany
         super(ManyToOne, self).bind_class(cls, name)
         length = self.foreign_pk.length
         name = self.name + '_id'
@@ -55,9 +54,13 @@ class ManyToOne(Relation):
             f_column=self.foreign_pk.name, on_update=self.on_update,
             on_delete = self.on_delete,
         )
-        self.backref = self.backref or clsname2tname(self.name)
+        return self
+
+    def prepare(self):
+        from eplasty.relation import OneToMany
+        self.backref = self.backref or clsname2tname(self.owner_class.__name__)
         self.foreign_class.add_field(self.backref, OneToMany(
-            cls, backref=name, dependent=dependent
+            self.owner_class, backref=self.name, dependent=self.dependent
         ))
         return self
 

@@ -118,6 +118,7 @@ selecting a table name"""
             column.bind(cls)
         cls.columns += field.columns
         setattr(cls, name, field)
+        field.prepare()
         return field
 
     def hydrate(cls, tup, session): #@NoSelf
