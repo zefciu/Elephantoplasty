@@ -76,7 +76,7 @@ class ManyToOne(Relation):
     def get_c_vals(self, dict_):
         return {
             self.column.name:
-                dict_[self.name] and dict_[self.name].get_pk_value()
+                dict_.get(self.name) and dict_[self.name].get_pk_value()
         }
 
     def __get__(self, inst, cls):
@@ -95,7 +95,7 @@ class ManyToOne(Relation):
         inst.check_orphan_status()
 
     def get_dependencies(self, dict_):
-        if dict_[self.name] is not None:
+        if dict_.get(self.name) is not None:
             yield dict_[self.name]
 
     def __eq__(self, other):

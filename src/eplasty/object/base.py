@@ -5,6 +5,7 @@ import itertools as it
 from eplasty import conditions as cond
 from eplasty.ctx import get_session
 from eplasty.result import Result
+from eplasty.conditions import Condition
 
 from .meta import ObjectMeta
 from .exc import NotFound, TooManyFound
@@ -175,12 +176,15 @@ Flush this object to database using given cursor
         
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):
+        args = list(args)
         session = get_session(session)
         cached =  session.find_cached(cls.__table_name__, id)
         if cached:
             return cached
         
-        if id is not None:
+        if isinstance(id, Condition):
+            args.append(id)
+        elif id is not None:
             kwargs['id'] = id
         
             
