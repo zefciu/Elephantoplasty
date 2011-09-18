@@ -7,10 +7,10 @@ import types
 
 CAPITAL = re.compile('[A-Z]')
 
-def camel2underscore(v):
+def camel2underscore(value):
     """Transforms CamelCasedName to underscored_name"""
-    first = v[0].lower()
-    rest = v[1:]
+    first = value[0].lower()
+    rest = value[1:]
     return first + re.sub(CAPITAL, lambda x: '_' + x.group(0).lower(), rest)
 
 def clsname2tname(clsname):
@@ -51,15 +51,17 @@ class queue_iterator(object):
             raise StopIteration
 
 def diff_unsorted(prev, curr):
+    """Compares two lists. Returns a tuple of added,deleted elements.
+    Ignores order modifications"""
     deleted = []
     added = []
-    for o in prev:
-        if o not in curr:
-            deleted.append(o)
+    for object_ in prev:
+        if object_ not in curr:
+            deleted.append(object_)
             
-    for o in curr:
-        if o not in prev:
-            added.append(o)
+    for object_ in curr:
+        if object_ not in prev:
+            added.append(object_)
     
     return added, deleted
 

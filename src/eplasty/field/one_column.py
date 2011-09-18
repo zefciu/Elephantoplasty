@@ -1,7 +1,10 @@
+"""OneColumn definition"""
+from abc import ABCMeta
 from eplasty import conditions as cond
 from .base import Field
 
 class OneColumn(Field):
+    __metaclass__ = ABCMeta
     '''
     Base class for all field that just proxy one column
     '''

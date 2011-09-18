@@ -31,12 +31,12 @@ class SelectQuery(object):
                 self._get_column_name(column) for column in self.columns
             ))
 
-    def _get_column_name(self, c):
+    def _get_column_name(self, column):
         """Renders a single column name (works on a column or a string)"""
-        if isinstance (c, ep.column.Column):
-            return '.'.join([c.owner_class.__table_name__, c.name])
+        if isinstance (column, ep.column.Column):
+            return '.'.join([column.owner_class.__table_name__, column.name])
         else:
-            return c
+            return column
 
     def _render_from(self):
         """Renders the FROM clause"""

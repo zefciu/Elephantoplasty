@@ -1,3 +1,4 @@
+"""Object metaclass definition"""
 import itertools as it
 
 from psycopg2 import ProgrammingError
@@ -40,9 +41,9 @@ selecting a table name"""
             if cls.parent_classes: 
                 dict_['__pk__'] = cls.parent_classes[0].__pk__
             else:
-                pk = SimplePK('id')
-                fields.insert(0, pk)
-                dict_['id'] = pk
+                primary_key = SimplePK('id')
+                fields.insert(0, primary_key)
+                dict_['id'] = primary_key
                 dict_['__pk__'] = ('id',)
 
         cls.__pk__ = dict_['__pk__']
@@ -64,17 +65,17 @@ selecting a table name"""
             
         dict_.pop('__table_name__', None)
 
-        for f in cls.fields:
-            f.prepare()
+        for field in cls.fields:
+            field.prepare()
 
     def create_table(cls, ctx = None): #@NoSelf
         cursor = get_cursor(ctx)
         column_decls = []
-        columns = it.chain(*[f.columns for f in cls.fields])
-        constraints = sum([f.constraints for f in cls.fields], [])
-        for c in columns:
-            if c.declaration:
-                column_decls.append(c.declaration) 
+        columns = it.chain(*[field.columns for field in cls.fields])
+        constraints = sum([field.constraints for field in cls.fields], [])
+        for column in columns:
+            if column.declaration:
+                column_decls.append(column.declaration) 
         constraints.append('PRIMARY KEY ({0})'.format(','.join(cls.__pk__)))
         command = """CREATE TABLE {tname}
         (
@@ -85,20 +86,20 @@ selecting a table name"""
                 [d[0] for d in column_decls] + constraints
             ), inh_clause = (
                 'INHERITS ({0})'.format(', '.join((
-                    c.__table_name__ for c in cls.parent_classes)
+                    column.__table_name__ for column in cls.parent_classes)
                 )) if cls.parent_classes else ''
             )
         )
-        args = sum([d[1] for d in column_decls], [])
+        args = sum([declaration[1] for declaration in column_decls], [])
         retried = False
         while True:
             try:
                 # print cursor.mogrify(command, args)
                 cursor.execute(command, args)
                 break
-            except ProgrammingError as e:
+            except ProgrammingError as err:
                 cursor.connection.rollback()
-                if e.pgcode == UNDEFINED_TABLE and not retried:
+                if err.pgcode == UNDEFINED_TABLE and not retried:
                     for col in cls.columns:
                         if col.references is not None:
                             col.references.create_table()

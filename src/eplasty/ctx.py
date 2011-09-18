@@ -22,7 +22,6 @@ def connect(*args, **kwargs):
 Passes all arguments to psycopg2 ``connect`` and creates a connection in global
 context.
     """
-    global ctx
     del_context()
     ctx.connection = psycopg2.connect(*args, **kwargs)
 
@@ -30,7 +29,6 @@ def get_connection(arg = None):
     """
 Get a connection. Will return the argument or try to find connection in context
     """
-    global ctx
     if arg:
         return arg
     elif ctx.connection:
@@ -49,7 +47,6 @@ def get_cursor(arg = None):
     * If there is neither given nor global context, raise CtxError
     """
     
-    global ctx
     
     if arg:
         if isinstance(arg, cursor):
@@ -70,7 +67,6 @@ def get_cursor(arg = None):
 
 def set_context(arg):
     """Set a global context using a connection or cursor"""
-    global ctx
     
     if isinstance(arg, connection):
         ctx.connection = arg
@@ -82,7 +78,6 @@ def set_context(arg):
         
 def del_context():
     """Clear the global context"""
-    global ctx
     
     ctx.connection = None
     ctx.cursor = None
@@ -90,14 +85,12 @@ def del_context():
 
 def start_session():
     """Start the session in global context"""
-    global ctx
     if ctx.session:
         ctx.session.close()
     ctx.session = Session(get_connection())
     
 def commit():
     """Commit the global session"""
-    global ctx
     if ctx.session:
         ctx.session.commit()
     else:
@@ -105,7 +98,6 @@ def commit():
     
 def add(*args, **kwargs):
     """Add to global session"""
-    global ctx
     if ctx.session:
         ctx.session.add(*args, **kwargs)
     else:
@@ -114,7 +106,6 @@ def add(*args, **kwargs):
 
 def is_global_session():
     """Check if global session exists and return it or false""" 
-    global ctx
     return ctx.session or False
     
 def get_session(session_ = None):
