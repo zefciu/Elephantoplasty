@@ -28,11 +28,11 @@ DONE
 #. Simplest identities
 #. Dependent and independent relations
 #. Some documentation
+#. Tree decorator for simple ``parent_id`` tree
 
 TODO
 ------------------
 
-#. Trees
 #. List-like and dict-like relations
 #. Advanced primary keys
 #. Concurrency control and conflict detection
@@ -40,3 +40,4 @@ TODO
 #. EAFP table migration
 #. Joined loading strategy
 #. Full documentation
+#. MPTT trees
