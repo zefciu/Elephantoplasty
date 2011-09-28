@@ -56,12 +56,12 @@ class Test(unittest.TestCase):
     def test_get(self):
         """Most basic test of finding related object"""
         start_session()
-        c = self.Character.get(name = 'Patsy')
+        c = self.Character.get(self.Character.name == 'Patsy')
         self.assertEqual(c.movie.title, 'MP & the Holy Grail')
 
     def test_backref(self):
         """Testing if backref is correctly created"""
-        grail = self.Movie.get(title = 'MP & the Holy Grail')
+        grail = self.Movie.get(self.Movie.title == 'MP & the Holy Grail')
         self.assertEqual(
             set((character.name for character in grail.characters)),
             set(['Patsy', 'Arthur'])
@@ -70,7 +70,7 @@ class Test(unittest.TestCase):
     def test_find_by_related(self):
         """Test finding by related object"""
         start_session()
-        life = self.Movie.get(title = 'Life of Brian')
+        life = self.Movie.get(self.Movie.title == 'Life of Brian')
         characters = self.Character.find(self.Character.movie == life)
         self.assertEqual(list(characters)[0].name, 'Brian')
 

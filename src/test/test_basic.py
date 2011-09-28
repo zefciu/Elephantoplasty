@@ -59,7 +59,7 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         
     def test_find(self):
         """Basic test for find() classmethod with keyword syntax"""
-        knights = self.Knight.find(title = 'Sir')
+        knights = self.Knight.find(self.Knight.title == 'Sir')
         names = set((k.name for k in knights))
         self.assertEqual(names, set(['Lancelot', 'Galahad', 'Robin']))
         knights.cursor.close()
@@ -78,11 +78,12 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         
         
     def test_deft(self):
+        """Test of default value"""
         k = self.Knight(name = 'Doris', nickname = 'The Hamster', score = 999)
         add(k)
         commit()
         start_session()
-        k_got = self.Knight.get(name = 'Doris')
+        k_got = self.Knight.get(self.Knight.name == 'Doris')
         self.assertEqual(k_got.title, 'Sir')
         
     def test_change(self):
@@ -101,7 +102,9 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         
     def test_not_found(self):
         """Test a get() not finding anything"""
-        self.assertRaises(NotFound, lambda: self.Knight.get(title = 'Mrs'))
+        self.assertRaises(
+            NotFound, lambda: self.Knight.get(self.Knight.title == 'Mrs')
+        )
         
     def test_too_many(self):
         """Test a get() finding too much"""
