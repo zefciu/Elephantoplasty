@@ -226,6 +226,12 @@ Flush this object to database using given cursor
     def get_pk(cls):
         """Get the tuple of columns acting as pk"""
         return tuple((c for c in cls.columns if c.name in cls.__pk__))
+
+    @classmethod
+    def get_pk_full_names(cls):
+        """Get the tuple of full, unambigous textural representations of
+        columns acting as pk"""
+        return tuple((c.render_full() for c in cls.get_pk()))
             
     def get_pk_value(self):
         """Get the tuple of values for the pk or None"""

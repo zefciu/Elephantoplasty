@@ -30,7 +30,7 @@ def prepare_col(col):
     """Checks if the given column is a tuple and reformats it to fit
     PostgresSQL syntax"""
     if isinstance(col, tuple):
-        return '({0})'.format(','.join((c.name for c in col)))
+        return '({0})'.format(','.join((c.render_full() for c in col)))
     else:
         return col.name
 

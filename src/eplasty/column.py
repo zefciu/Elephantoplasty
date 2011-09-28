@@ -36,6 +36,11 @@ class Column(object):
 
         self.owner_class = None
 
+    def render_full(self):
+        """Returns the full, unambiguous name of this column that can be used
+        in SQL."""
+        return '{0}.{1}'.format(self.owner_class.__table_name__, self.name)
+
     def _is_compatible(self, value):
         """Checks if python variable is compatible with this column."""
         for type_ in self.compat_types:
