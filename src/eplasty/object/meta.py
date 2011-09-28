@@ -25,6 +25,10 @@ class ObjectMeta(type):
         else:
             cls._abstract = False
             cls._setup_non_abstract(classname, bases, dict_, fields)
+
+        cls.indexes = []
+        if '__indexes__' in dict_:
+            cls.indexes += dict_['__indexes__']
         
         super(ObjectMeta, cls).__init__(classname, bases, dict_)
         
@@ -43,12 +47,13 @@ selecting a table name"""
             else:
                 primary_key = SimplePK('id')
                 fields.insert(0, primary_key)
-                dict_['id'] = primary_key
+                cls.id = dict_['id'] = primary_key
                 dict_['__pk__'] = ('id',)
 
         cls.__pk__ = dict_['__pk__']
         dict_.pop('__pk__', None)
-        cls.columns = sum((f.columns for f in fields), [])
+        cls.columns = sum((field.columns for field in fields), [])
+        cls.indexes += sum((field.indexes for field in fields), [])
         for col in cls.columns:
             col.bind(cls)
         cls.inh_columns = sum([
@@ -109,6 +114,8 @@ selecting a table name"""
                         raise
                 else:
                     raise
+        for index in cls.indexes:
+            cursor.execute(index_cmd(index), [])
 
         cursor.connection.commit()
 

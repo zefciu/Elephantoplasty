@@ -9,6 +9,7 @@ class Field(object):
 
     columns = []
     orphaned = False
+    indexes = []
 
     def __init__(self, *args, **kwargs):
 #        self.kwargs = kwargs

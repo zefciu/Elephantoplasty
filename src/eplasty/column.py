@@ -46,7 +46,7 @@ class Column(object):
     @property
     def declaration(self):
         """The declaration for this column used for CREATE"""
-        return "{name} {pgtype}{length} {pgattrs}".format(
+        return '"{name}" {pgtype}{length} {pgattrs}'.format(
             name = self.name,
             pgtype = self.pgtype,
             length = '({0})'.format(self.length) if self.length else '',

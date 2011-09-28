@@ -5,7 +5,7 @@ import itertools as it
 from eplasty import conditions as cond
 from eplasty.ctx import get_session
 from eplasty.result import Result
-from eplasty.conditions import Condition
+from eplasty.conditions import Condition, Equals
 
 from .meta import ObjectMeta
 from .exc import NotFound, TooManyFound
@@ -58,7 +58,7 @@ class Object(object):
         for f in it.chain(self.fields, self.inh_fields):
             cvals = f.get_c_vals(self._current)
             for cname, cval in cvals.items():
-                col_names.append(cname)
+                col_names.append('"{0}"'.format(cname))
                 col_values.append(cval)
         # print cursor.mogrify(
         #     'INSERT INTO {0} ({1}) VALUES ({2}) RETURNING {3}'.format(
@@ -150,14 +150,16 @@ Flush this object to database using given cursor
         """Returns column names as a comma separated string to be used in
         SQL queries"""
         columns = it.chain(cls.columns, cls.inh_columns) if all else cls.columns
-        return ','.join((c.name for c in columns if not c.pseudo))
+        return ','.join(
+            ('"{0}"'.format(c.name) for c in columns if not c.pseudo)
+        )
     
     @classmethod
     def _get_conditions(cls, *args, **kwargs):
         """Reformats args and kwargs to a ``Condition`` object"""
         args = list(args)
-        for k, v in kwargs.items():
-            args.append(cond.Equals(k, v))
+        # for k, v in kwargs.items():
+        #     args.append(cond.Equals(k, v))
         
         if not args:
             return cond.All()
@@ -185,7 +187,7 @@ Flush this object to database using given cursor
         if isinstance(id, Condition):
             args.append(id)
         elif id is not None:
-            kwargs['id'] = id
+            args.append(Equals(cls.get_pk(), id)) 
         
             
         cursor = session.cursor()
