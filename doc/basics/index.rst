@@ -7,3 +7,5 @@ Elephantoplasty basic tutorial
 
     what_here
     first_steps/index
+    objects
+
