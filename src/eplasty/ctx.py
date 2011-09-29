@@ -1,6 +1,7 @@
 """Things related to the global context"""
 from psycopg2.extensions import cursor, connection
 from eplasty.session import Session
+from eplasty.cursor import EPConnection
 import psycopg2
 
 class CtxError(Exception):
@@ -23,6 +24,7 @@ Passes all arguments to psycopg2 ``connect`` and creates a connection in global
 context.
     """
     del_context()
+    kwargs.setdefault('connection_factory', EPConnection)
     ctx.connection = psycopg2.connect(*args, **kwargs)
 
 def get_connection(arg = None):

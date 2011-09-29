@@ -9,6 +9,7 @@ from eplasty.ctx import get_connection, commit, add, get_session
 from .util import get_test_conn, config
 from psycopg2.extensions import cursor
 from eplasty.session import Session
+from eplasty.cursor import EPCursor
 
 class Test(unittest.TestCase):
 
@@ -61,7 +62,7 @@ class Test(unittest.TestCase):
         
     def test_get_cursor_with_conn(self):
         """Get cursor for connection"""
-        self.assertEqual(type(get_cursor(get_test_conn())), cursor)
+        self.assertEqual(type(get_cursor(get_test_conn())), EPCursor)
         
     def test_get_cursor_with_cursor(self):
         """Passing a cursor to get_cursor should return itself"""
