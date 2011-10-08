@@ -7,14 +7,14 @@ class EPCursor(psycopg2.extensions.cursor):
     """Custom cursor class that performs logging"""
 
     def __init__(self, *args, **kwargs):
-        self.unad_logger = logging.getLogger('eplasty.queries.unadapted')
+        # self.unad_logger = logging.getLogger('eplasty.queries.unadapted')
         self.sql_logger = logging.getLogger('eplasty.queries.sql')
         self.err_logger = logging.getLogger('eplasty.errors')
         super(EPCursor, self).__init__(*args, **kwargs)
 
     def execute(self, sql, args=None):
-        self.unad_logger.info(sql)
-        self.unad_logger.info(args)
+        #self.unad_logger.info(sql)
+        #self.unad_logger.info(args)
         try:
             command = self.mogrify(sql, args)
             self.sql_logger.info(command)

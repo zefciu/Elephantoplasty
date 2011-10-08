@@ -65,6 +65,7 @@ def diff_unsorted(prev, curr):
     
     return added, deleted
 
+
 def index_cmd(table_name, index_declaration):
     """Given and index in form (name, [columns]) returns SQL declaration"""
     index_name, columns = index_declaration

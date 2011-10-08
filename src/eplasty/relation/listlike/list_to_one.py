@@ -1,6 +1,7 @@
 """The many(list) side of listlike relation"""
 from eplasty.relation import Relation
 from eplasty.column import BigSerial, BigInt
+from eplasty.lazy import LazyQuery
 
 class ListToOneRecord(object):
     """Simple structures that store related object and order"""
@@ -70,6 +71,9 @@ class ListToOne(Relation):
             inst._current[self.name] = inst._current[self.name]()
         return inst._current[self.name]
 
+    def get_dependencies(self, dict_):
+        if dict_.get(self.name) is not None:
+            yield dict_[self.name].object
 
     def __set__(self, inst, v):
         raise TypeError('List2One is read-only. Try from the other side')

@@ -2,7 +2,7 @@
 
 from eplasty.relation import Relation
 from eplasty.relation.listlike.list_to_one import ListToOne
-from eplasty.util import camel2underscore, RelationList
+from eplasty.util import camel2underscore, RelationList, diff_unsorted
 from eplasty.conditions import Equals
 from eplasty.lazy import LazyQuery
 
@@ -48,6 +48,14 @@ class OneToList(Relation):
             ), order_by = self.foreign_field.order_column, session = session
         )
 
+    def _resolve_diff(self, inst, prev, curr):
+        added, deleted = diff_unsorted(prev, curr) #@UnusedVariable
+        for obj in deleted:
+            self.foreign_field._set(obj, None, None)
+        for i, obj in enumerate(curr, start=1):
+            self.foreign_field._set(obj, inst, i)
+
+
     def __get__(self, inst, cls):
         if isinstance(inst._current[self.name], LazyQuery):
             inst._current[self.name] = inst._current[self.name]()
@@ -55,6 +63,11 @@ class OneToList(Relation):
                 self, inst, inst._current[self.name]
             )
         return inst._current[self.name]
+
+    def __set__(self, inst, v):
+        prev = inst._current.get(self.name, [])
+        self._resolve_diff(inst, prev, v)
+        inst._current[self.name] = v
 
     def get_c_vals(self, dict_):
         return {}
