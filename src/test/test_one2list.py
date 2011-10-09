@@ -1,4 +1,7 @@
-import unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
 
 import eplasty as ep
 from util import get_test_conn
@@ -49,7 +52,21 @@ class Test(unittest.TestCase):
         ep.start_session()
         # import pdb; pdb.set_trace()
         meal = self.Meal.get(self.Meal.id == 3)
-        self.assertEqual(
+        self.assertListEqual(
             [ingredient.name for ingredient in meal.ingredients],
             ['spam', 'bacon', 'sausage'],
+        )
+
+    def test_swap(self):
+        """Test if swappin elements from a list from fixture works"""
+        ep.start_session()
+        meal = self.Meal.get(self.Meal.id == 3)
+        ing = meal.ingredients.pop(0)
+        meal.ingredients.append(ing)
+        ep.commit()
+        ep.start_session
+        meal = self.Meal.get(self.Meal.id == 3)
+        self.assertListEqual(
+            [ingredient.name for ingredient in meal.ingredients],
+            ['bacon', 'sausage', 'spam'],
         )

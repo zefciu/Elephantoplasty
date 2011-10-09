@@ -12,15 +12,17 @@ class SelectQuery(object):
           in format (join type, table name, ON condtion)
     """
 
-    __slots__ = ['from_', 'condition', 'columns', 'joins']
+    __slots__ = ['from_', 'condition', 'columns', 'joins', 'order']
 
     def __init__(
-        self, from_, condition=ep.conditions.All(), columns='*', joins=False
+        self, from_, condition=ep.conditions.All(), columns='*', joins=False,
+        order = None
     ):
         self.from_ = from_
         self.condition = condition
         self.columns = columns
         self.joins = joins or []
+        self.order = order or []
 
     def _render_columns(self):
         """Renders the SELECT clause"""
@@ -54,15 +56,28 @@ class SelectQuery(object):
             variables += cond_variables
         return ''.join(buff), variables
 
+    def _render_order(self):
+        """Renders the ORDER BY clause"""
+        if self.order:
+            parts = []
+            for column, direction in self.order:
+                parts.append('{0} {1}'.format(
+                    self._get_column_name(column), direction)
+                )
+            return ' ORDER BY ' + ', '.join(parts)
+        else:
+            return ''
+
     def render(self):
         """Renders the query"""
         select_clause = self._render_columns()
         from_clause, from_vars = self._render_from()
         where_clause, where_vars = self.condition.render()
+        order_clause = self._render_order()
         return (
             (
                 'SELECT {select_clause} FROM {from_clause}'
-                ' WHERE {where_clause};'
+                ' WHERE {where_clause}{order_clause};'
             ).format(**locals()),
             where_vars
         )

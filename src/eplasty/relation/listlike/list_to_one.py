@@ -2,6 +2,7 @@
 from eplasty.relation import Relation
 from eplasty.column import BigSerial, BigInt
 from eplasty.lazy import LazyQuery
+from eplasty.object.const import UNCHANGED, UPDATED, MODIFIED
 
 class ListToOneRecord(object):
     """Simple structures that store related object and order"""
@@ -9,6 +10,8 @@ class ListToOneRecord(object):
     def __init__(self, object_, order):
         self.object = object_
         self.order = order
+    def __eq__(self, other):
+        return self.object == other.object and self.order == other.order
 
 class ListToOne(Relation):
     """This field is indended as backref for OneToList relation. It shouldn't
@@ -81,12 +84,21 @@ class ListToOne(Relation):
     def _set(self, inst, object_, order):
         """This is a backdoor through which the ``one'' side can set value of
         this field. Shouldn't be used in any other circumstances"""
+        mod = False
+        prev = inst._current.get(self.name, None)
         if object_ is not None:
-            inst._current[self.name] = ListToOneRecord(object_, order)
+            curr = ListToOneRecord(object_, order)
+            inst._current[self.name] = curr
+            if curr != prev:
+                mod = True
             self.orphaned = False
         else:
-            inst._current[self.name] = None
-            self.orphaned = True
+            if self.name in inst._current and prev is not None:
+                inst._current[self.name] = None
+                mod = True
+                self.orphaned = True
+        if inst._status in [UNCHANGED, UPDATED] and mod:
+            inst._status = MODIFIED
         inst.check_orphan_status()
 
         

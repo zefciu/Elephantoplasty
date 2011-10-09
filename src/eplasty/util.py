@@ -87,9 +87,12 @@ class _TraceableOverride(object):
 
     def __call__(self, owner, *args, **kwargs):
         prev = owner[:]
-        getattr(super(TraceableList, owner), self.method_name)(*args, **kwargs)
+        result = getattr(
+            super(TraceableList, owner), self.method_name
+        )(*args, **kwargs)
         now = owner[:]
         owner.callback(prev, now)
+        return result
 
     def __get__(self, inst, type):
         return types.MethodType(self, inst, type)

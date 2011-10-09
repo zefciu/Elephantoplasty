@@ -2,6 +2,7 @@ import unittest
 
 import eplasty as ep
 from eplasty import Object
+from .util import get_test_conn
 
 class Test(unittest.TestCase):
     """Tests for a simple tree"""
@@ -11,6 +12,8 @@ class Test(unittest.TestCase):
         class Thing(Object):
             name = ep.field.CharacterVarying(30)
 
+        self.connection = get_test_conn()
+        ep.set_context(self.connection)
         animals = Thing(name='Animals')
         birds = Thing(name = 'Birds', parent=animals)
         mammals = Thing(name = 'Mammals', parent=animals)

@@ -14,13 +14,13 @@ config_file = os.path.join(
 
 config = SafeConfigParser()
 config.read(config_file)
+handler = logging.FileHandler('tests.log', 'w')
+sql_logger = logging.getLogger('eplasty.queries.sql')
+sql_logger.addHandler(handler)
+err_logger = logging.getLogger('eplasty.errors')
+err_logger.addHandler(handler)
 
 def get_test_conn():
-    handler = logging.FileHandler('tests.log', 'w')
-    sql_logger = logging.getLogger('eplasty.queries.sql')
-    sql_logger.addHandler(handler)
-    err_logger = logging.getLogger('eplasty.errors')
-    err_logger.addHandler(handler)
     
     return connect(
         host = config.get('db', 'host'),

@@ -5,6 +5,7 @@ from eplasty.relation.listlike.list_to_one import ListToOne
 from eplasty.util import camel2underscore, RelationList, diff_unsorted
 from eplasty.conditions import Equals
 from eplasty.lazy import LazyQuery
+from eplasty.object.const import UNCHANGED, UPDATED, MODIFIED
 
 class OneToList(Relation):
     """Listlike relation. It is intended to behave fully as persistent pythonic
@@ -45,7 +46,8 @@ class OneToList(Relation):
             self.foreign_class, 'find', 
             Equals(
                 self.foreign_field.column.name, inst.get_pk_value()
-            ), order_by = self.foreign_field.order_column, session = session
+            ), order = [(self.foreign_field.order_column, 'ASC')],
+            session = session
         )
 
     def _resolve_diff(self, inst, prev, curr):
@@ -68,6 +70,8 @@ class OneToList(Relation):
         prev = inst._current.get(self.name, [])
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
+        if inst._status in [UNCHANGED, UPDATED]:
+            inst._status = MODIFIED
 
     def get_c_vals(self, dict_):
         return {}

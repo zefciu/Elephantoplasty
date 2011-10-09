@@ -91,7 +91,7 @@ class Object(object):
         for f, (was, is_) in diff: #@UnusedVariable
             cvals = f.get_c_vals(self._current)
             for c, v in cvals.iteritems():
-                col_names.append('{0} = %s'.format(c))
+                col_names.append('"{0}" = %s'.format(c))
                 col_values.append(v)
             
         pk = self._current['id']
@@ -167,13 +167,14 @@ Flush this object to database using given cursor
         return cond.And(*args)
     
     @classmethod
-    def _get_query(cls, condition):
+    def _get_query(cls, condition, order):
         """Returns tuple to be executed for this class and given
         ``condition``"""
         return SelectQuery(
             cls.__table_name__,
             columns = cls.columns,
-            condition = condition
+            condition = condition,
+            order = order,
         ).render()
         
     @classmethod
@@ -193,7 +194,8 @@ Flush this object to database using given cursor
         cursor = session.cursor()
         
         condition = cls._get_conditions(*args, **kwargs)
-        cursor.execute(*cls._get_query(condition))
+        order = kwargs.get('order', [])
+        cursor.execute(*cls._get_query(condition, order))
         
         if cursor.rowcount == 1:
             r = cls.hydrate(cursor.fetchone(), session)
@@ -214,7 +216,8 @@ Flush this object to database using given cursor
         tmp_cursor = session.cursor()
         condition = cls._get_conditions(*args, **kwargs)
         
-        query = cls._get_query(condition)
+        order = kwargs.get('order', [])
+        query = cls._get_query(condition, order)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
         cursor = session.cursor()
         cursor.execute(*query)
