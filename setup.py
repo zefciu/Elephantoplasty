@@ -19,13 +19,13 @@ setup(
       setup_requires = ['nose>=1.0', 'nose-cov>=1.0'],
       package_dir = {'': 'src'},
       packages = [
-          'eplasty', 'eplasty.field', 'eplasty.object', 'eplasty.relation'
+          'eplasty', 'eplasty.field', 'eplasty.object', 'eplasty.relation',
+          'eplasty.relation.listlike'
       ],
       classifiers = [
-          'Development Status :: 2 = Pre-Alpha',
+          'Development Status :: 2 - Pre-Alpha',
           'Intended Audience :: Developers',
-          'Intended Audience :: Developers',
-          'License :: OSI APPROVED :: BSD License',
+          'License :: OSI Approved :: BSD License',
           'Programming Language :: Python :: 2',
           'Programming Language :: Python :: 2.6',
           'Programming Language :: Python :: 2.7',
