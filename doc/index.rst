@@ -18,6 +18,7 @@ Contents:
     introduction
     basics/index
     advanced/index
+    api/index
 
 Indices and tables
 ==================

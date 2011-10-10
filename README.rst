@@ -29,11 +29,12 @@ DONE
 #. Dependent and independent relations
 #. Some documentation
 #. Tree decorator for simple ``parent_id`` tree
+#. List-like relations
 
 TODO
 ------------------
 
-#. List-like and dict-like relations
+#. Dict-like relations
 #. Advanced primary keys
 #. Concurrency control and conflict detection
 #. Advanced identities

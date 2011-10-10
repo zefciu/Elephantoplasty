@@ -26,3 +26,15 @@ As an example let us create a class and some instences of it::
 As you can see, there are two ways of setting the field values. One is by
 passing arguments to constructor, the other - to set them as attributes.
     
+Unlike SQLAlchemy_ which has two modes - one with explicit table creation and
+one called 'declarative', Elephantoplasty features only 'declarative'. The
+database schema is created based on the class declaration. Two things that get
+deduced:
+
+.. _SQLAlchemy: http://sqlalchemy.org/
+
+* The table name can be specified with ``__table_name__``. It defaults to the
+  pluralization of the class name (here it would be "birds").
+
+* The default primary key is called ``id`` and is a column of type serial_. You
+  can also provide a different primary key.
