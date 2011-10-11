@@ -1,12 +1,12 @@
 # vim set fileencoding=utf-8
 from setuptools import setup
 
-with open('README.rst') as f:
+with open('README.txt') as f:
     long_description = f.read()
 
 setup(
       name = 'Elephantoplasty',
-      version = '0.0.1',
+      version = '0.0.1-2',
       author = 'Szymon Pyżalski',
       author_email = 'zefciu <szymon@pythonista.net>',
       description = 'A PostgreSQL ORM',
