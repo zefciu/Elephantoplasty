@@ -1,17 +1,20 @@
 """Things related to the global context"""
+import threading
+
+import psycopg2
 from psycopg2.extensions import cursor, connection
+
 from eplasty.session import Session
 from eplasty.cursor import EPConnection
-import psycopg2
 
 class CtxError(Exception):
     """Exception raised on problems with context"""
     
-class Ctx(object):
-    """This class will have one global instance - the default context"""
-    __slots__ = ['connection', 'cursor', 'session']
+class Ctx(threading.local):
+    """Thread-local class with default context"""
     
     def __init__ (self, connection_ = None, cursor_ = None, session = None):
+        super(Ctx, self).__init__()
         self.connection = connection_
         self.cursor = cursor_
         self.session = session
