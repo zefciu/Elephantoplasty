@@ -18,3 +18,6 @@ class SimplePK(OneColumn):
         self.name = name
         self.columns = [BigSerial(name = name)]
         return super(SimplePK, self).__init__(name=name, **kwargs)
+
+    def _is_compatible(self, value):
+        raise NotImplementedError

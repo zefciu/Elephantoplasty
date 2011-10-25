@@ -94,6 +94,18 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         k_got = self.Knight.get(2)
         self.assertEqual(k_got.name, 'John')
 
+    def test_change_id(self):
+        """Changing id should be impossible"""
+        k = self.Knight.get(2)
+        k.name = 'John'
+        commit()
+        start_session()
+        def broken():
+            k =  self.Knight.get(2)
+            k.id = 1
+            
+        self.assertRaises(TypeError, broken)
+
     def test_incompatible(self):
         k = self.Knight.get(2)
         def broken():

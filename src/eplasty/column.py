@@ -58,10 +58,6 @@ class Column(object):
             pgattrs = ' '.join(a[0] for a in self.pgattrs),
         ), sum([a[1] for a in self.pgattrs], [])
 
-    @property
-    def full_name(self):
-        """The full, unambiguos name of this column"""
-        return '.'.join([self.owner_class.__table_name__, self.name])
 
     def bind(self, cls):
         """Adds owner class and name to the column and returns self"""
@@ -71,11 +67,6 @@ class Column(object):
     def hydrate(self, value, session):
         """Transform raw value from database to object version"""
         return value
-
-    @classmethod
-    def get_dependencies(cls, value):
-        """Get a list of objects that should be flushed before this one"""
-        return []
 
 
 class BigSerial(Column):

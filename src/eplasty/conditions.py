@@ -10,7 +10,6 @@ class Condition(object):
     @abc.abstractmethod
     def render(self):
         """Render the condition as SQL snippet"""
-        raise NotImplementedError
 
     def __and__(self, other):
         return And(self, other)
