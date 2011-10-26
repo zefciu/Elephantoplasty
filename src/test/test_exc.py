@@ -4,13 +4,22 @@ Testing the exception raising of various objects and methods
 import unittest
 
 from psycopg2 import ProgrammingError
+from psycopg2.errorcodes import UNDEFINED_OBJECT
 
 from eplasty import Object
 from eplasty.conditions import Condition
-from eplasty.field import CharacterVarying
+from eplasty.column import Column
+from eplasty.field import Simple, CharacterVarying
 from eplasty.ctx import set_context, add, commit, start_session
 from test.util import get_test_conn
 
+class BrokenCol(Column):
+    """PostgreSQL integer type"""
+    pgtype = 'fondlemybuttocks'
+    compat_types = [int]
+
+class BrokenField(Simple):
+    ColumnType = BrokenCol
 
 class Test(unittest.TestCase):
     """Some simple exceptions"""
@@ -67,12 +76,16 @@ class Test(unittest.TestCase):
         
         add(Spam(bacon = 'sausage'))
         self.assertRaises(ProgrammingError, commit)
-        
-        
-        
-            
-            
-        
+
+    def test_unhandled_exception(self):
+        """Testing the exception from engine that can't be handled"""
+        conn = get_test_conn()
+        class Spam(Object):
+            eggs = BrokenField()
+        try:
+            Spam.create_table()
+        except ProgrammingError, err:
+            self.assertEqual(err.pgcode, UNDEFINED_OBJECT)
         
 
 if __name__ == "__main__":

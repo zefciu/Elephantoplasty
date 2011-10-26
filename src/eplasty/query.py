@@ -29,14 +29,14 @@ class SelectQuery(object):
         if self.columns == '*':
             return '*'
         else:
-            return ','.join((
+            return ', '.join((
                 self._get_column_name(column) for column in self.columns
             ))
 
     def _get_column_name(self, column):
         """Renders a single column name (works on a column or a string)"""
         if isinstance (column, ep.column.Column):
-            return '.'.join([column.owner_class.__table_name__, column.name])
+            return column.render_full()
         else:
             return column
 
@@ -45,15 +45,17 @@ class SelectQuery(object):
         buff = [self.from_]
         variables = []
         for j in self.joins:
-            type_, table, condition = j
+            type_, table, l_column, r_column = j
             type_ = type_ or ''
-            cond_txt, cond_variables = condition.render()
-            buff.append('{type_} JOIN {table} ON {condition}'.format(
-                type_ = type_,
-                table = table,
-                condition = cond_txt
-            ))
-            variables += cond_variables
+            buff.append(' {type_} JOIN {table} ON {l_column} = {r_column}'.\
+                format(
+                    type_ = type_,
+                    table = table,
+                    l_column = l_column,
+                    r_column = r_column,
+                )
+            )
+            variables
         return ''.join(buff), variables
 
     def _render_order(self):

@@ -72,7 +72,7 @@ def index_cmd(table_name, index_declaration):
     return """CREATE INDEX {index_name} ON {table_name}
         USING btree ({columns})""".format(
             index_name=index_name, table_name=table_name,
-            columns = ', '.join(columns)
+            columns = ', '.join(('"{0}"'.format(c) for c in columns))
         )
 
 class TraceableList(list):

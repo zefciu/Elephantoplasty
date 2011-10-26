@@ -57,6 +57,15 @@ class Test(unittest.TestCase):
             ['spam', 'bacon', 'sausage'],
         )
 
+    def test_backref(self):
+        """Test if items are getting correct backref"""
+        ep.start_session()
+        meal = self.Meal.get(self.Meal.id == 3)
+        self.assertEqual(
+            meal.ingredients[0].meal,
+            meal,
+        )
+
     def test_swap(self):
         """Test if swappin elements from a list from fixture works"""
         ep.start_session()
@@ -70,3 +79,23 @@ class Test(unittest.TestCase):
             [ingredient.name for ingredient in meal.ingredients],
             ['bacon', 'sausage', 'spam'],
         )
+
+    def test_back_search(self):
+        """Test using the backref as a base for condition"""
+        ep.start_session()
+        meal = self.Meal.get(self.Meal.id == 3)
+        ingredients = self.Ingredient.find(self.Ingredient.meal == meal)
+        self.assertSetEqual(
+            set((ingredient.id for ingredient in meal.ingredients)),
+            set((ingredient.id for ingredient in ingredients)),
+        )
+
+    def test_wrong_side(self):
+        """Trying to write to the backref"""
+        ep.start_session()
+        meal1 = self.Meal.get(self.Meal.id == 1)
+        meal2 = self.Meal.get(self.Meal.id == 2)
+        def wrong():
+            meal1.ingredients[0].meal = meal2
+        self.assertRaises(TypeError, wrong)
+

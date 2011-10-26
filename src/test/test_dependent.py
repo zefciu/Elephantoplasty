@@ -62,3 +62,20 @@ class Test(unittest.TestCase):
         def wrong():
             return self.Ingredient.get(ing_id)
         self.assertRaises(NotFound, wrong)
+
+    def test_move(self):
+        """Test if you can safely move a dependent object without it getting
+        deleted"""
+        ep.start_session()
+        meal1 = self.Meal.get(1)
+        meal2 = self.Meal.get(2)
+        ing = meal1.ingredients.pop(0)
+        ing_id = ing.id
+        meal2.ingredients.append(ing)
+        ep.commit()
+        ep.start_session()
+        meal1 = self.Meal.get(1)
+        meal2 = self.Meal.get(2)
+        ing = self.Ingredient.get(ing_id)
+        self.assertEqual(len(meal1.ingredients), 1)
+        self.assertEqual(len(meal2.ingredients), 4)

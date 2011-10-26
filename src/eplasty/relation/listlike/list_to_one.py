@@ -3,6 +3,7 @@ from eplasty.relation import Relation
 from eplasty.column import BigSerial, BigInt
 from eplasty.lazy import LazyQuery
 from eplasty.object.const import UNCHANGED, UPDATED, MODIFIED
+from eplasty import conditions as cond
 
 class ListToOneRecord(object):
     """Simple structures that store related object and order"""
@@ -10,8 +11,9 @@ class ListToOneRecord(object):
     def __init__(self, object_, order):
         self.object = object_
         self.order = order
-    def __eq__(self, other):
-        return self.object == other.object and self.order == other.order
+    # UNCOMMENT WHEN NEEDED
+    # def __eq__(self, other):
+    #     return self.object == other.object and self.order == other.order
 
 class ListToOne(Relation):
     """This field is indended as backref for OneToList relation. It shouldn't
@@ -52,10 +54,9 @@ class ListToOne(Relation):
         return [self.constraint]
 
     def hydrate(self, ins, col_vals, dict_, session):
-        col_val = col_vals[self.column.name]
-        dict_[self.name] = LazyQuery(
-            self.foreign_class, 'get', col_val
-        )
+        dict_[self.name] = ListToOneRecord(LazyQuery(
+            self.foreign_class, 'get', col_vals[self.column.name]
+        ), col_vals[self.order_column.name])
 
     def get_c_vals(self, dict_):
         return {
@@ -70,9 +71,9 @@ class ListToOne(Relation):
     def __get__(self, inst, cls):
         if inst is None:
             return self
-        if isinstance(inst._current[self.name], LazyQuery):
-            inst._current[self.name] = inst._current[self.name]()
-        return inst._current[self.name]
+        if isinstance(inst._current[self.name].object, LazyQuery):
+            inst._current[self.name].object = inst._current[self.name].object()
+        return inst._current[self.name].object
 
     def get_dependencies(self, dict_):
         if dict_.get(self.name) is not None:
@@ -101,4 +102,5 @@ class ListToOne(Relation):
             inst._status = MODIFIED
         inst.check_orphan_status()
 
-        
+    def __eq__(self, other):
+        return cond.Equals(self.column.name, other.get_pk_value())

@@ -123,7 +123,7 @@ class Object(object):
         appropriately"""
         for f in self.fields:
             if f.orphaned:
-                self._status = ORPHANED
+                self.set_orphan_status()
                 return
         if self._status == ORPHANED:
             self._status = MODIFIED
@@ -143,17 +143,6 @@ Flush this object to database using given cursor
         elif self._status in [DELETED, ORPHANED]:
             self._do_delete(session, cursor)
         
-
-    
-    @classmethod
-    def _get_column_names(cls, all = False):
-        """Returns column names as a comma separated string to be used in
-        SQL queries"""
-        columns = it.chain(cls.columns, cls.inh_columns) if all else cls.columns
-        return ','.join(
-            ('"{0}"'.format(c.name) for c in columns if not c.pseudo)
-        )
-    
     @classmethod
     def _get_conditions(cls, *args, **kwargs):
         """Reformats args and kwargs to a ``Condition`` object"""
@@ -230,11 +219,6 @@ Flush this object to database using given cursor
         """Get the tuple of columns acting as pk"""
         return tuple((c for c in cls.columns if c.name in cls.__pk__))
 
-    @classmethod
-    def get_pk_full_names(cls):
-        """Get the tuple of full, unambigous textural representations of
-        columns acting as pk"""
-        return tuple((c.render_full() for c in cls.get_pk()))
             
     def get_pk_value(self):
         """Get the tuple of values for the pk or None"""

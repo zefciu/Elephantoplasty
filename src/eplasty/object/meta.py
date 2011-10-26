@@ -5,7 +5,7 @@ from psycopg2 import ProgrammingError
 
 from eplasty.field import Field
 # from eplasty.relation import Relation 
-from eplasty.util import clsname2tname
+from eplasty.util import clsname2tname, index_cmd
 from eplasty.ctx import get_cursor
 from psycopg2.errorcodes import UNDEFINED_TABLE
 from eplasty.field import SimplePK
@@ -19,6 +19,9 @@ class ObjectMeta(type):
             f.bind_class(cls, n)
             for n, f in dict_.items() if isinstance(f, Field)
         ]
+        cls.indexes = []
+        # if '__indexes__' in dict_:
+        #     cls.indexes += dict_['__indexes__']
 
         if not fields:
             cls._abstract = True
@@ -26,9 +29,6 @@ class ObjectMeta(type):
             cls._abstract = False
             cls._setup_non_abstract(classname, bases, dict_, fields)
 
-        cls.indexes = []
-        if '__indexes__' in dict_:
-            cls.indexes += dict_['__indexes__']
         
         super(ObjectMeta, cls).__init__(classname, bases, dict_)
         
@@ -110,12 +110,10 @@ selecting a table name"""
                             col.references.create_table()
                             retried = True
                             break
-                    else:
-                        raise
                 else:
                     raise
         for index in cls.indexes:
-            cursor.execute(index_cmd(index), [])
+            cursor.execute(index_cmd(cls.__table_name__, index), [])
 
         cursor.connection.commit()
 
@@ -125,6 +123,7 @@ selecting a table name"""
         for column in field.columns:
             column.bind(cls)
         cls.columns += field.columns
+        cls.indexes += field.indexes
         setattr(cls, name, field)
         field.prepare()
         return field
