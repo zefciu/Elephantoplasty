@@ -93,6 +93,9 @@ class Object(object):
             for c, v in cvals.iteritems():
                 col_names.append('"{0}" = %s'.format(c))
                 col_values.append(v)
+
+        if not col_names: #Might happend when modified field has no columns
+            return
             
         pk = self._current['id']
         col_names = ', '.join(col_names)

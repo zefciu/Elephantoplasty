@@ -26,17 +26,10 @@ class ManyToMany(Relation):
         self.fmt = fmt
         super(ManyToMany, self).__init__(**kwargs)
             
-    def bind(self, cls, name):
-        self.owner_class = cls
-        self.name = name
-        if not self.backref:
-            self.backref = self.name
 
     def prepare(self): 
         """This method is called when relation is ready to create it's
         PrimaryTable"""
-        if not self.foreign_class:
-            self.foreign_class = self.owner_class
         
         self.owner_fk = camel2underscore(self.owner_class.__name__)
         self.foreign_fk = camel2underscore(self.foreign_class.__name__)

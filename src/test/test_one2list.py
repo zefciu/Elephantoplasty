@@ -80,6 +80,22 @@ class Test(unittest.TestCase):
             ['bacon', 'sausage', 'spam'],
         )
 
+    def test_swap_as_new(self):
+        """Test swapping, but this time we set a completely new list"""
+        ep.start_session()
+        meal = self.Meal.get(self.Meal.id == 3)
+        new_ings = meal.ingredients[:]
+        ing = new_ings.pop(0)
+        new_ings.append(ing)
+        meal.ingredients = new_ings
+        ep.commit()
+        ep.start_session
+        meal = self.Meal.get(self.Meal.id == 3)
+        self.assertListEqual(
+            [ingredient.name for ingredient in meal.ingredients],
+            ['bacon', 'sausage', 'spam'],
+        )
+
     def test_back_search(self):
         """Test using the backref as a base for condition"""
         ep.start_session()
@@ -97,5 +113,13 @@ class Test(unittest.TestCase):
         meal2 = self.Meal.get(self.Meal.id == 2)
         def wrong():
             meal1.ingredients[0].meal = meal2
+        self.assertRaises(TypeError, wrong)
+
+    def test_uncompatible(self):
+        """Trying to set uncompatible type"""
+        ep.start_session()
+        meal1 = self.Meal.get(self.Meal.id == 1)
+        def wrong():
+            meal1.ingredients = 1
         self.assertRaises(TypeError, wrong)
 

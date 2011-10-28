@@ -27,19 +27,12 @@ class OneToList(Relation):
             self.owner_class.__name__
         )
         
-        self.foreign_field = None
-        for field in self.foreign_class.fields:
-            if field.name == self.backref:
-                self.foreign_field = field
-                break
-
-        if not self.foreign_field:
-            self.foreign_field = self.foreign_class.add_field(
-                self.backref,
-                ListToOne(
-                    foreign_class=self.owner_class
-                ),
-            )
+        self.foreign_field = self.foreign_class.add_field(
+           self.backref,
+           ListToOne(
+               foreign_class=self.owner_class
+           ),
+        )
 
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = LazyQuery(
@@ -67,6 +60,10 @@ class OneToList(Relation):
         return inst._current[self.name]
 
     def __set__(self, inst, v):
+        if not self._is_compatible(v):
+            raise TypeError("{0} is not compatible with OneToList".format(
+                type(v)
+            ))
         prev = inst._current.get(self.name, [])
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
