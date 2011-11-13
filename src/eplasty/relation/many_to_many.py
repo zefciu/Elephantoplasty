@@ -31,6 +31,8 @@ class ManyToMany(Relation):
         """This method is called when relation is ready to create it's
         PrimaryTable"""
         
+        if self.foreign_class is None:
+            self.foreign_class = self.owner_class
         self.owner_fk = camel2underscore(self.owner_class.__name__)
         self.foreign_fk = camel2underscore(self.foreign_class.__name__)
         if self.owner_fk == self.foreign_fk:
