@@ -4,6 +4,7 @@ from .base import Relation
 from eplasty.util import (
     clsname2tname, camel2underscore, diff_unsorted, RelationList
 )
+from eplasty.conditions import Equals
 from eplasty.object.meta import ObjectMeta
 from eplasty.result import Result
 from eplasty.object.base import NotFound
@@ -58,8 +59,8 @@ class ManyToMany(Relation):
         dict_[self.name] = LazyManyToMany(self, inst.session, inst.get_pk_value())
 
     def __set__(self, inst, v):
-        if isinstance(v, Result):
-            raise TypeError('Result objects are read-only. Use list instead')
+        # if isinstance(v, Result):
+        #     raise TypeError('Result objects are read-only. Use list instead')
         prev = inst._current.get(self.name, [])
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
@@ -75,9 +76,9 @@ class ManyToMany(Relation):
         if inst.session is not None:
             for obj in deleted:
                 try:
-                    to_delete = inst.session.get(
-                        Equals(self.owner_fk, inst.get_pk_value() &
-                        Equals(self.foreign_fk, obj.get_pk_value()))
+                    to_delete = self.PrimaryTable.get(
+                        (getattr(self.PrimaryTable, self.owner_fk) == inst) &
+                        (getattr(self.PrimaryTable, self.foreign_fk) == obj)
                     )
                 except NotFound:
                     continue

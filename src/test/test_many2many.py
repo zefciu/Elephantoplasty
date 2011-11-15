@@ -1,4 +1,8 @@
-import unittest
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+
 from test.util import get_test_conn
 
 from psycopg2 import ProgrammingError
@@ -57,8 +61,18 @@ class Test(unittest.TestCase):
         ep.commit()
         ep.start_session()
         meal = self.Meal.get(1)
-        self.assertEqual(
+        self.assertSetEqual(
             set([i.name for i in meal.ingredients]),
             set(['spam', 'eggs', 'bacon'])
         )
         
+    def test_replace(self):
+        """Replacing full list so __set__ is called"""
+        ep.start_session()
+        meal = self.Meal.get(1)
+        eggs = self.Ingredient.get(2)
+        meal.ingredients = [eggs]
+        self.assertSetEqual(
+            set([i.name for i in meal.ingredients]),
+            set(['eggs'])
+        )

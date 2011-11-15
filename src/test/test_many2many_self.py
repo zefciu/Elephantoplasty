@@ -11,6 +11,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.connection = get_test_conn()
         ep.set_context(self.connection)
+        ep.start_session()
         class Food(ep.Object):
             name = ep.f.CharacterVarying(20)
             ingredients = ep.rel.ManyToMany()
