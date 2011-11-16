@@ -10,6 +10,7 @@ from eplasty import Object
 from eplasty.conditions import Condition
 from eplasty.column import Column
 from eplasty.field import Simple, CharacterVarying
+from eplasty.relation import ManyToOne
 from eplasty.ctx import set_context, add, commit, start_session, ctx
 from test.util import get_test_conn
 
@@ -106,6 +107,21 @@ class Test(unittest.TestCase):
             spam = Spam.get(1)
         except ProgrammingError as err:
             self.assertEqual(err.pgcode, UNDEFINED_COLUMN)
+
+    def test_reference_complex_pk(self):
+        """Trying to reference complex pk should cause TypeError"""
+        def broken():
+            class Spam(Object):
+                name = CharacterVarying(20)
+                surname = CharacterVarying(20)
+                __pk__ = ('name', 'surname')
+
+            class Eggs(Object):
+                spam = ManyToOne(Spam)
+
+        self.assertRaises(TypeError, broken)
+
+
 
         
 

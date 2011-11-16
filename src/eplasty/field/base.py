@@ -1,5 +1,6 @@
 from eplasty.object.const import DELETED, UNCHANGED, UPDATED, MODIFIED
 from eplasty.object.exc import LifecycleError
+from eplasty import conditions as cond
 
 class Field(object):
     """
@@ -56,6 +57,9 @@ class Field(object):
 
     def prepare(self):
         pass
+
+    def __eq__(self, other):
+        return cond.Equals(self.column, other)
     
     def get_dependencies(self, dict_):
         """

@@ -1,6 +1,5 @@
 """OneColumn definition"""
 from abc import ABCMeta
-from eplasty import conditions as cond
 from .base import Field
 
 class OneColumn(Field):
@@ -30,5 +29,3 @@ class OneColumn(Field):
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = col_vals[self.column.name]
 
-    def __eq__(self, other):
-        return cond.Equals(self.column.name, other)

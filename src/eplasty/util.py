@@ -21,10 +21,10 @@ def clsname2tname(clsname):
     else:
         return sing + 's'
     
-def clsname2kname(clsname):
-    """Transforms the class name into foreign key name"""
-    underscored = camel2underscore(clsname)
-    return '{0}_id'.format(underscored)
+# def clsname2kname(clsname):
+#     """Transforms the class name into foreign key name"""
+#     underscored = camel2underscore(clsname)
+#     return '{0}_id'.format(underscored)
 
 def prepare_col(col):
     """Checks if the given column is a tuple and reformats it to fit

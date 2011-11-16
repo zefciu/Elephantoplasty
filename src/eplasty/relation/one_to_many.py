@@ -59,8 +59,6 @@ class OneToMany(Relation):
             
 
     def __set__(self, inst, v):
-        if isinstance(v, Result):
-            raise TypeError('Result objects are read-only. Use list instead')
         prev = inst._current.get(self.name, [])
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
