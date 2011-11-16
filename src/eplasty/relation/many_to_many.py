@@ -60,8 +60,6 @@ class ManyToMany(Relation):
 
     def _find_existing_primary(self, inst, obj):
         try:
-            if not hasattr(inst, 'get_pk_value'):
-                import pdb; pdb.set_trace()
             return self.PrimaryTable.get(
                 (getattr(self.PrimaryTable, self.owner_fk) == inst) &
                 (getattr(self.PrimaryTable, self.foreign_fk) == obj)
@@ -71,7 +69,6 @@ class ManyToMany(Relation):
 
     def _resolve_diff(self, inst, prev, curr):
         added, deleted = diff_unsorted(prev, curr) #@UnusedVariable
-        self.temporary = []
         for obj in added:
             if not self._find_existing_primary(inst, obj):
                 new_primary = self.PrimaryTable()
@@ -98,13 +95,8 @@ class ManyToMany(Relation):
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
 
-    def _is_compatible(self, value):
-        return isinstance(value, (list, set))
+    # def _is_compatible(self, value):
+    #     return isinstance(value, (list, set))
 
     def get_c_vals(self, dict_):
         return {}
-
-    def bind_session(self, session):
-        if self.temporary:
-            session.add(*self.temporary)
-        self.tempoarary = []
