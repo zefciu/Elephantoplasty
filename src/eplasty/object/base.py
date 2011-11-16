@@ -2,15 +2,18 @@ from base64 import b64encode
 from hashlib import sha1
 import itertools as it
 
+from psycopg2 import ProgrammingError
+from psycopg2.errorcodes import UNDEFINED_TABLE
+
 from eplasty import conditions as cond
 from eplasty.ctx import get_session
 from eplasty.result import Result
 from eplasty.conditions import Condition, Equals
+from eplasty.lazy import LazyQuery
 
-from .meta import ObjectMeta
-from .exc import NotFound, TooManyFound
-from .const import NEW, MODIFIED, ORPHANED
-from eplasty.object.const import DELETED
+from eplasty.object.meta import ObjectMeta
+from eplasty.object.exc import NotFound, TooManyFound
+from eplasty.object.const import NEW, MODIFIED, ORPHANED, DELETED
 from eplasty.util import prepare_col
 from eplasty.query import SelectQuery
 
@@ -187,7 +190,15 @@ Flush this object to database using given cursor
         
         condition = cls._get_conditions(*args, **kwargs)
         order = kwargs.get('order', [])
-        cursor.execute(*cls._get_query(condition, order))
+        try:
+            cursor.execute(*cls._get_query(condition, order))
+        except ProgrammingError as err:
+            if err.pgcode == UNDEFINED_TABLE:
+                session.connection.rollback()
+                raise NotFound("Didn't find anything")
+            else:
+                raise
+
         
         if cursor.rowcount == 1:
             r = cls.hydrate(cursor.fetchone(), session)
@@ -235,9 +246,11 @@ Flush this object to database using given cursor
         one"""
         result = []
         for f in self.fields:
-#           if f.name in self._current:
             for d in f.get_dependencies(self._current):
-                if d._status == NEW and not d._flushed:
+                if (
+                    not isinstance(d, LazyQuery) and
+                    (d._status == NEW and not d._flushed)
+                ):
                     result.append(d)
         return result or False
 

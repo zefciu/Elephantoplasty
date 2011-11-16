@@ -58,31 +58,31 @@ class ManyToMany(Relation):
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = LazyManyToMany(self, inst.session, inst.get_pk_value())
 
-    def __set__(self, inst, v):
-        # if isinstance(v, Result):
-        #     raise TypeError('Result objects are read-only. Use list instead')
-        prev = inst._current.get(self.name, [])
-        self._resolve_diff(inst, prev, v)
-        inst._current[self.name] = v
-        
+    def _find_existing_primary(self, inst, obj):
+        try:
+            if not hasattr(inst, 'get_pk_value'):
+                import pdb; pdb.set_trace()
+            return self.PrimaryTable.get(
+                (getattr(self.PrimaryTable, self.owner_fk) == inst) &
+                (getattr(self.PrimaryTable, self.foreign_fk) == obj)
+            )
+        except NotFound:
+            return
+
     def _resolve_diff(self, inst, prev, curr):
         added, deleted = diff_unsorted(prev, curr) #@UnusedVariable
         self.temporary = []
         for obj in added:
-            new_primary = self.PrimaryTable()
-            setattr(new_primary, self.owner_fk, inst)
-            setattr(new_primary, self.foreign_fk, obj)
-            inst.add(new_primary)
+            if not self._find_existing_primary(inst, obj):
+                new_primary = self.PrimaryTable()
+                setattr(new_primary, self.owner_fk, inst)
+                setattr(new_primary, self.foreign_fk, obj)
+                inst.add(new_primary)
         if inst.session is not None:
             for obj in deleted:
-                try:
-                    to_delete = self.PrimaryTable.get(
-                        (getattr(self.PrimaryTable, self.owner_fk) == inst) &
-                        (getattr(self.PrimaryTable, self.foreign_fk) == obj)
-                    )
-                except NotFound:
-                    continue
-                to_delete.delete()
+                to_delete = self._find_existing_primary(inst, obj)
+                if to_delete:
+                    to_delete.delete()
 
 
     def __get__(self, inst, cls):
@@ -94,8 +94,6 @@ class ManyToMany(Relation):
         return inst._current[self.name]
 
     def __set__(self, inst, v):
-        if isinstance(v, Result):
-            raise TypeError('Result objects are read-only. Use list instead')
         prev = inst._current.get(self.name, [])
         self._resolve_diff(inst, prev, v)
         inst._current[self.name] = v
