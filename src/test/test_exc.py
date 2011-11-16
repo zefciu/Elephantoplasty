@@ -4,13 +4,13 @@ Testing the exception raising of various objects and methods
 import unittest
 
 from psycopg2 import ProgrammingError
-from psycopg2.errorcodes import UNDEFINED_OBJECT
+from psycopg2.errorcodes import UNDEFINED_OBJECT, UNDEFINED_COLUMN
 
 from eplasty import Object
 from eplasty.conditions import Condition
 from eplasty.column import Column
 from eplasty.field import Simple, CharacterVarying
-from eplasty.ctx import set_context, add, commit, start_session
+from eplasty.ctx import set_context, add, commit, start_session, ctx
 from test.util import get_test_conn
 
 class BrokenCol(Column):
@@ -80,12 +80,33 @@ class Test(unittest.TestCase):
     def test_unhandled_exception(self):
         """Testing the exception from engine that can't be handled"""
         conn = get_test_conn()
+        set_context(conn)
         class Spam(Object):
             eggs = BrokenField()
         try:
             Spam.create_table()
         except ProgrammingError, err:
+            conn.rollback()
             self.assertEqual(err.pgcode, UNDEFINED_OBJECT)
+
+    def test_unhandled_exception_getting(self):
+        """Testing the exception from engine that can't be handled
+        (while get()ting)"""
+        conn = get_test_conn()
+        set_context(conn)
+        start_session()
+        class Spam(Object):
+            eggs = CharacterVarying(20)
+        add(Spam(eggs='abc'))
+        commit()
+        start_session()
+        class Spam(Object):
+            bacon = CharacterVarying(20)
+        try:
+            spam = Spam.get(1)
+        except ProgrammingError as err:
+            self.assertEqual(err.pgcode, UNDEFINED_COLUMN)
+
         
 
 if __name__ == "__main__":
