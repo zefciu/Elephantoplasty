@@ -16,7 +16,8 @@ setup(
       long_description = long_description,
       
       install_requires = ['psycopg2>=2.4.1'],
-      setup_requires = ['nose>=1.0', 'nose-cov>=1.0'],
+      tests_require = ['nose>=1.0', 'nose-cov>=1.0'],
+      test_suite = 'nose.collector',
       package_dir = {'': 'src'},
       packages = [
           'eplasty', 'eplasty.field', 'eplasty.object', 'eplasty.relation',
