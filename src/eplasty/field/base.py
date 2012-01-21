@@ -13,7 +13,6 @@ class Field(object):
     indexes = []
 
     def __init__(self, *args, **kwargs):
-#        self.kwargs = kwargs
         if 'default' in kwargs:
             self._default = kwargs['default']
 
@@ -71,3 +70,7 @@ class Field(object):
     def bind_session(self, session):
         """Do whatever needed when owner is added to session. Default NOP"""
         pass
+
+    def commit(self, inst):
+        """This hook is called before the owning object is committed.
+        If it raises an exception, the transaction is rolled back"""
