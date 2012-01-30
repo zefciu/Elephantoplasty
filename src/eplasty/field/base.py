@@ -49,8 +49,6 @@ class Field(object):
     def bind_class(self, cls, name):
         self.owner_class = cls
         self.name = name
-#         self.kwargs['owner_class'] = cls
-#         self.kwargs['name'] = name
         return self
 
     constraints = []

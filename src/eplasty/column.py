@@ -90,3 +90,8 @@ class CharacterVarying(Column):
     """PostgreSQL character varying type"""
     pgtype = 'character varying'
     compat_types = [str]
+
+class OID(Column):
+    """PostgreSQL oid type"""
+    pgtype = 'oid'
+    compat_types = [int, long]

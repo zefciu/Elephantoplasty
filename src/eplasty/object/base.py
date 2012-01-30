@@ -5,11 +5,10 @@ import itertools as it
 from psycopg2 import ProgrammingError
 from psycopg2.errorcodes import UNDEFINED_TABLE
 
-from eplasty import conditions as cond
 from eplasty.ctx import get_session
 from eplasty.result import Result
-from eplasty.conditions import Condition, Equals
 from eplasty.lazy import LazyQuery
+from eplasty import conditions as cond
 
 from eplasty.object.meta import ObjectMeta
 from eplasty.object.exc import NotFound, TooManyFound
@@ -180,10 +179,10 @@ Flush this object to database using given cursor
         if cached:
             return cached
         
-        if isinstance(id, Condition):
+        if isinstance(id, cond.Condition):
             args.append(id)
         elif id is not None:
-            args.append(Equals(cls.get_pk(), id)) 
+            args.append(cond.Equals(cls.get_pk(), id)) 
         
             
         cursor = session.cursor()

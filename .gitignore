@@ -9,3 +9,4 @@ dist
 pylint
 *.log
 *.egg/
+*.swp
