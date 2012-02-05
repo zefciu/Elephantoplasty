@@ -193,7 +193,7 @@ Flush this object to database using given cursor
             cursor.execute(*cls._get_query(condition, order))
         except ProgrammingError as err:
             if err.pgcode == UNDEFINED_TABLE:
-                session.connection.rollback()
+                session._rollback(True)
                 raise NotFound("Didn't find anything")
             else:
                 raise

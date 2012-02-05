@@ -99,11 +99,10 @@ selecting a table name"""
         retried = False
         while True:
             try:
-                # print cursor.mogrify(command, args)
                 cursor.execute(command, args)
                 break
             except ProgrammingError as err:
-                cursor.connection.rollback()
+                cursor.connection.rollback_clean()
                 if err.pgcode == UNDEFINED_TABLE and not retried:
                     for col in cls.columns:
                         if col.references is not None:

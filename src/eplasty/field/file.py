@@ -1,8 +1,21 @@
 import functools as ft
 
+from psycopg2.extensions import lobject
+
 from eplasty.field.base import Field
 from eplasty import column as col
 from eplasty.object.exc import LifecycleError
+
+class TracedLObject(lobject):
+    def write(self, *args, **kwargs):
+        result = super(TracedLObject, self).write(*args, **kwargs)
+        self.connection.save()
+        return result
+
+    def export(self, *args, **kwargs):
+        result = super(TracedLObject, self).write(*args, **kwargs)
+        self.connection.save()
+        return result
 
 class _LazyLobject(object):
     """Simple lazy objects that store data for not loaded lobjects. Not to be
@@ -45,12 +58,15 @@ PostgreSQL large objects, so the files are limited to 2GB."""
         if self.name in inst._current and inst._current[self.name] is not None:
             if isinstance(inst._current[self.name], _LazyLobject):
                 inst._current[self.name] = inst.session.connection.lobject(
-                    inst._current[self.name].oid
+                    inst._current[self.name].oid, 'rw', 0, None, TracedLObject
                 )
             fobj = inst._current[self.name]
         else:
-            fobj = inst.session.connection.lobject()
-            inst._current[self.name] = _LazyLobject(oid=fobj.oid)
+            fobj = inst.session.connection.lobject(
+                0, 'rw', 0, None, TracedLObject
+            )
+            inst._current[self.name] = fobj
+        fobj.connection=inst.session.connection
         return fobj
 
 
@@ -76,5 +92,3 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             }
         else:
             return {}
-    
-

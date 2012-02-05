@@ -26,6 +26,26 @@ class EPCursor(psycopg2.extensions.cursor):
 class EPConnection(psycopg2.extensions.connection):
     """Connection class that creates logging cursors"""
 
+    def __init__(self, *args, **kwargs):
+        self.savepoint = None
+        return super(EPConnection, self).__init__(*args, **kwargs)
+
     def cursor(self, *args, **kwargs):
         kwargs.setdefault('cursor_factory', EPCursor)
         return super(EPConnection, self).cursor(*args, **kwargs)
+
+    def save(self):
+        """Sets a savepoint to which this connection should be rolled
+        back if a EAFP error appears. This should be used if some data is
+        stored in this connection which can be lost on EAFP rollback"""
+        self.cursor().execute('SAVEPOINT clean;')
+        self.savepoint = 'clean'
+
+    def rollback_clean(self):
+        if self.savepoint is not None:
+            self.cursor().execute(
+                'ROLLBACK TO SAVEPOINT {0}'.format(self.savepoint)
+            )
+        else:
+            self.rollback()
+

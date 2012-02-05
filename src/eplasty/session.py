@@ -21,9 +21,12 @@ and are able to flush them to database
     def __del__(self):
         self.close()
 
-    def _rollback(self):
+    def _rollback(self, clean=False):
         """Rollback the connection and unset ``flushed`` flags"""
-        self.connection.rollback()
+        if clean:
+            self.connection.rollback_clean()
+        else:
+            self.connection.rollback()
         for object_ in self.objects:
             object_._flushed = False
 
@@ -71,12 +74,12 @@ and are able to flush them to database
                     object_._flushed = True
                 except ProgrammingError as err:
                     if err.pgcode == UNDEFINED_TABLE:
-                        cursor.connection.commit()
+                        self._rollback(True)
                         type(object_).create_table(cursor)
-                        self._rollback()
                         self.flush()
                         return
                     else:
+                        self._rollback(False)
                         raise
 
         self.connection.commit()
@@ -106,4 +109,3 @@ and are able to flush them to database
         """Perform flush and commit the transaction"""
         self.flush()
         self.connection.commit()
-

@@ -17,7 +17,6 @@ class Test(unittest.TestCase):
             title = ep.f.CharacterVarying(length=16)
             content = ep.f.FileField()
 
-        Skit.create_table()
         self.conn = get_test_conn()
         ep.set_context(self.conn)
         ep.start_session()
