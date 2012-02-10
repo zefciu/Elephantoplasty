@@ -110,6 +110,9 @@ class Object(object):
         
     def _do_delete(self, session, cursor):
         """Performs the actual deletion from database"""
+        for field in self.fields:
+            if field.before_delete is not None:
+                field.before_delete(self, session, cursor)
         cursor.execute(
             'DELETE FROM {0} WHERE {1} = %s'.format(
                 self.__table_name__,
@@ -117,6 +120,9 @@ class Object(object):
             ),
             [self.get_pk_value()],
         )
+        for field in self.fields:
+            if field.after_delete is not None:
+                field.after_delete(self, session, cursor)
 
     def set_orphan_status(self):
         """Sets the status to ORPHANED if it makes sense"""

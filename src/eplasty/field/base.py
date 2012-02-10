@@ -11,6 +11,8 @@ class Field(object):
     columns = []
     orphaned = False
     indexes = []
+    before_delete = None
+    after_delete = None
 
     def __init__(self, *args, **kwargs):
 #        self.kwargs = kwargs

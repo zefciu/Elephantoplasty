@@ -2,6 +2,7 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+from psycopg2 import OperationalError
 
 import eplasty as ep
 
@@ -32,7 +33,18 @@ class Test(unittest.TestCase):
         self.conn.commit()
 
     def test_read(self):
+        """Simple test for reading a lobject content"""
         ep.start_session()
         parrot = self.Skit.get(1)
         content = parrot.content.read()
         self.assertEqual(content, CONTENT)
+
+    def test_delete(self):
+        """Check if no garbage is left after we delete object containg lobject
+        """
+        ep.start_session()
+        parrot = self.Skit.get(1)
+        oid = parrot.content.oid
+        parrot.delete()
+        ep.commit()
+        self.assertRaises(OperationalError, lambda: self.conn.lobject(oid))

@@ -49,25 +49,33 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             'instead.'
         )
 
+    def _get_existing(self, inst):
+        if self.name in inst._current and inst._current[self.name] is not None:
+            if isinstance(inst._current[self.name], _LazyLobject):
+                inst._current[self.name] = inst.session.connection.lobject(
+                    inst._current[self.name].oid, 'rw', 0, None, TracedLObject
+                )
+            return inst._current[self.name]
+
     def __get__(self, inst, cls):
         if not inst.session:
             raise LifecycleError(
                 'You cannot write to FileFields that are not added to a'
                 ' session'
             )
-        if self.name in inst._current and inst._current[self.name] is not None:
-            if isinstance(inst._current[self.name], _LazyLobject):
-                inst._current[self.name] = inst.session.connection.lobject(
-                    inst._current[self.name].oid, 'rw', 0, None, TracedLObject
-                )
-            fobj = inst._current[self.name]
-        else:
+        fobj = self._get_existing(inst)
+        if fobj is None:
             fobj = inst.session.connection.lobject(
                 0, 'rw', 0, None, TracedLObject
             )
             inst._current[self.name] = fobj
         fobj.connection=inst.session.connection
         return fobj
+
+    def after_delete(self, inst, session, cursor):
+        fobj = self._get_existing(inst)
+        if fobj is not None:
+            fobj.unlink()
 
 
     def _get_mimetype(self, col_vals):
