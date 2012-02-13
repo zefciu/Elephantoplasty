@@ -59,3 +59,12 @@ class Test(unittest.TestCase):
         parrot = self.Skit.get(1)
         self.assertEqual(parrot.content.read(), '')
 
+    def test_size(self):
+        """Test getting the size. As it involves seek()ing also check if
+        position is unchanged"""
+        ep.start_session()
+        parrot = self.Skit.get(1)
+        parrot.content.seek(10)
+        self.assertEqual(parrot.content.get_size(), len(CONTENT))
+        self.assertEqual(parrot.content.tell(), 10)
+

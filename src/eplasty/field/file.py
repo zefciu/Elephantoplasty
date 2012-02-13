@@ -22,6 +22,12 @@ class TracedLObject(lobject):
         self.inst.touch()
         super(TracedLObject, self).unlink()
 
+    def get_size(self):
+        pos = self.tell()
+        result = self.seek(0, 2)
+        self.seek(pos, 0)
+        return result
+
 class _LazyLObject(object):
     """Simple lazy objects that store data for not loaded lobjects. Not to be
     created directly"""
