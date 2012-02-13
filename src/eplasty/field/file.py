@@ -17,7 +17,12 @@ class TracedLObject(lobject):
         self.connection.save()
         return result
 
-class _LazyLobject(object):
+    def unlink(self):
+        self.inst._current[self.name] = None
+        self.inst.touch()
+        super(TracedLObject, self).unlink()
+
+class _LazyLObject(object):
     """Simple lazy objects that store data for not loaded lobjects. Not to be
     created directly"""
     def __init__(self, oid=None, filename=None, mimetype=None):
@@ -51,7 +56,9 @@ PostgreSQL large objects, so the files are limited to 2GB."""
 
     def _get_existing(self, inst):
         if self.name in inst._current and inst._current[self.name] is not None:
-            if isinstance(inst._current[self.name], _LazyLobject):
+            # if isinstance(inst._current[self.name], TracedLObject):
+            #     return inst._current[self.name]
+            if isinstance(inst._current[self.name], _LazyLObject):
                 inst._current[self.name] = inst.session.connection.lobject(
                     inst._current[self.name].oid, 'rw', 0, None, TracedLObject
                 )
@@ -70,6 +77,8 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             )
             inst._current[self.name] = fobj
         fobj.connection=inst.session.connection
+        fobj.inst = inst
+        fobj.name = self.name
         return fobj
 
     def after_delete(self, inst, session, cursor):
@@ -86,10 +95,11 @@ PostgreSQL large objects, so the files are limited to 2GB."""
 
     def hydrate(self, inst, col_vals, dict_, session):
         if col_vals[self.oid_column.name] is None:
-            dict_[self.name] == None
-        dict_[self.name] = _LazyLobject(
-            oid = col_vals[self.oid_column.name],
-        )
+            dict_[self.name] = None
+        else:
+            dict_[self.name] = _LazyLObject(
+                oid = col_vals[self.oid_column.name],
+            )
 
     def get_c_vals(self, dict_):
         if self.name in dict_ and dict_[self.name] is not None:
@@ -99,4 +109,8 @@ PostgreSQL large objects, so the files are limited to 2GB."""
                 self.mime_column.name: 'application/octet-string',
             }
         else:
-            return {}
+            return {
+                self.oid_column.name: None,
+                self.filename_column.name: 'filename',
+                self.mime_column.name: 'application/octet-string',
+            }

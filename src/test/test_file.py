@@ -48,3 +48,14 @@ class Test(unittest.TestCase):
         parrot.delete()
         ep.commit()
         self.assertRaises(OperationalError, lambda: self.conn.lobject(oid))
+
+    def test_unlink(self):
+        """Check if unlinking an lobject is handled by None'ing a field"""
+        ep.start_session()
+        parrot = self.Skit.get(1)
+        parrot.content.unlink()
+        ep.commit()
+        ep.start_session()
+        parrot = self.Skit.get(1)
+        self.assertEqual(parrot.content.read(), '')
+

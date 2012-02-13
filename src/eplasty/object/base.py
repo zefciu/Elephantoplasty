@@ -12,7 +12,9 @@ from eplasty import conditions as cond
 
 from eplasty.object.meta import ObjectMeta
 from eplasty.object.exc import NotFound, TooManyFound
-from eplasty.object.const import NEW, MODIFIED, ORPHANED, DELETED
+from eplasty.object.const import (
+    NEW, MODIFIED, ORPHANED, DELETED, UPDATED, UNCHANGED
+)
 from eplasty.util import prepare_col
 from eplasty.query import SelectQuery
 
@@ -274,3 +276,9 @@ Flush this object to database using given cursor
             self.session.add(*os)
         else:
             self.temporary += os
+
+    def touch(self):
+        """Set status to modified if applicable"""
+        if self._status in [UNCHANGED, UPDATED]:
+            self._status = MODIFIED
+
