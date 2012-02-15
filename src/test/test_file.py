@@ -8,7 +8,8 @@ import eplasty as ep
 
 from .util import get_test_conn
 
-CONTENT = 'Lorem ipsum dolor sit amet'
+CONTENT_PARROT = 'Lorem ipsum dolor sit amet'
+CONTENT_HUNGARIAN = 'Lorem ipsum dolor sit amet'
 
 class Test(unittest.TestCase):
     """Tests for FileField"""
@@ -18,14 +19,24 @@ class Test(unittest.TestCase):
             title = ep.f.CharacterVarying(length=16)
             content = ep.f.FileField()
 
+        class RandomFile(ep.Object):
+            title = ep.f.CharacterVarying(length=16)
+            content = ep.f.FileField()
+
         self.conn = get_test_conn()
         ep.set_context(self.conn)
         ep.start_session()
         self.Skit = Skit
+        self.RandomFile = RandomFile
         parrot = Skit(title='parrot')
         ep.add(parrot)
         parrot.content.filename='parrot.txt'
-        parrot.content.write(CONTENT)
+        parrot.content.write(CONTENT_PARROT)
+        hungarian = Skit(title='hungarian')
+        ep.add(hungarian)
+        hungarian.content.filename='hungarian.txt'
+        hungarian.content.mimetype='text/x-rst'
+        hungarian.content.write(CONTENT_HUNGARIAN)
         ep.commit()
 
     def tearDown(self):
@@ -38,7 +49,7 @@ class Test(unittest.TestCase):
         ep.start_session()
         parrot = self.Skit.get(1)
         content = parrot.content.read()
-        self.assertEqual(content, CONTENT)
+        self.assertEqual(content, CONTENT_PARROT)
 
     def test_delete(self):
         """Check if no garbage is left after we delete object containg lobject
@@ -66,7 +77,7 @@ class Test(unittest.TestCase):
         ep.start_session()
         parrot = self.Skit.get(1)
         parrot.content.seek(10)
-        self.assertEqual(parrot.content.get_size(), len(CONTENT))
+        self.assertEqual(parrot.content.get_size(), len(CONTENT_PARROT))
         self.assertEqual(parrot.content.tell(), 10)
 
     def test_mime(self):
@@ -74,4 +85,10 @@ class Test(unittest.TestCase):
         parrot = self.Skit.get(1)
         self.assertEqual(parrot.content.filename, 'parrot.txt')
         self.assertEqual(parrot.content.mimetype, 'text/plain')
+
+    def test_forced_mime(self):
+        ep.start_session()
+        hungarian = self.Skit.get(2)
+        self.assertEqual(hungarian.content.filename, 'hungarian.txt')
+        self.assertEqual(hungarian.content.mimetype, 'text/x-rst')
         
