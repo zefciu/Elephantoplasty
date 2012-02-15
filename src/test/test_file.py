@@ -24,6 +24,7 @@ class Test(unittest.TestCase):
         self.Skit = Skit
         parrot = Skit(title='parrot')
         ep.add(parrot)
+        parrot.content.filename='parrot.txt'
         parrot.content.write(CONTENT)
         ep.commit()
 
@@ -68,3 +69,9 @@ class Test(unittest.TestCase):
         self.assertEqual(parrot.content.get_size(), len(CONTENT))
         self.assertEqual(parrot.content.tell(), 10)
 
+    def test_mime(self):
+        ep.start_session()
+        parrot = self.Skit.get(1)
+        self.assertEqual(parrot.content.filename, 'parrot.txt')
+        self.assertEqual(parrot.content.mimetype, 'text/plain')
+        

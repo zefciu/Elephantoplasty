@@ -1,4 +1,5 @@
 import functools as ft
+import mimetypes as mt
 
 from psycopg2.extensions import lobject
 
@@ -7,6 +8,12 @@ from eplasty import column as col
 from eplasty.object.exc import LifecycleError
 
 class TracedLObject(lobject):
+    
+    def __init__(self, *args, **kwargs):
+        super(TracedLObject, self).__init__(*args, **kwargs)
+        self._mimetype = None
+        self.filename = None
+
     def write(self, *args, **kwargs):
         result = super(TracedLObject, self).write(*args, **kwargs)
         self.connection.save()
@@ -27,6 +34,22 @@ class TracedLObject(lobject):
         result = self.seek(0, 2)
         self.seek(pos, 0)
         return result
+
+    @property
+    def mimetype(self):
+        if self._mimetype is not None:
+            return self._mimetype
+        elif self.filename is not None:
+            type_, enc = mt.guess_type(self.filename)
+            if type_ is not None:
+                self._mimetype = type_
+                return type_
+        return 'application/octet-stream'
+
+    @mimetype.setter
+    def mimetype(self, value):
+        self._mimetype = value
+            
 
 class _LazyLObject(object):
     """Simple lazy objects that store data for not loaded lobjects. Not to be
@@ -62,12 +85,14 @@ PostgreSQL large objects, so the files are limited to 2GB."""
 
     def _get_existing(self, inst):
         if self.name in inst._current and inst._current[self.name] is not None:
-            # if isinstance(inst._current[self.name], TracedLObject):
-            #     return inst._current[self.name]
             if isinstance(inst._current[self.name], _LazyLObject):
-                inst._current[self.name] = inst.session.connection.lobject(
-                    inst._current[self.name].oid, 'rw', 0, None, TracedLObject
+                lazy = inst._current[self.name]
+                real = inst.session.connection.lobject(
+                    lazy.oid, 'rw', 0, None, TracedLObject
                 )
+                real.filename = lazy.filename
+                real.mimetype = lazy.mimetype
+                inst._current[self.name] = real
             return inst._current[self.name]
 
     def __get__(self, inst, cls):
@@ -105,18 +130,21 @@ PostgreSQL large objects, so the files are limited to 2GB."""
         else:
             dict_[self.name] = _LazyLObject(
                 oid = col_vals[self.oid_column.name],
+                filename = col_vals[self.filename_column.name],
+                mimetype = col_vals[self.mime_column.name],
             )
 
     def get_c_vals(self, dict_):
         if self.name in dict_ and dict_[self.name] is not None:
+            fobj = dict_[self.name]
             return {
-                self.oid_column.name: dict_[self.name].oid,
-                self.filename_column.name: 'filename',
-                self.mime_column.name: 'application/octet-string',
+                self.oid_column.name: fobj.oid,
+                self.filename_column.name: fobj.filename,
+                self.mime_column.name: fobj.mimetype,
             }
         else:
             return {
                 self.oid_column.name: None,
-                self.filename_column.name: 'filename',
-                self.mime_column.name: 'application/octet-string',
+                self.filename_column.name: None,
+                self.mime_column.name: None,
             }
