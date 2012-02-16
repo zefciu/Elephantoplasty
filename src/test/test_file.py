@@ -10,6 +10,7 @@ from .util import get_test_conn
 
 CONTENT_PARROT = 'Lorem ipsum dolor sit amet'
 CONTENT_HUNGARIAN = 'Lorem ipsum dolor sit amet'
+CONTENT_INQUISITION = 'Lorem ipsum dolor sit amet'
 
 class Test(unittest.TestCase):
     """Tests for FileField"""
@@ -19,15 +20,15 @@ class Test(unittest.TestCase):
             title = ep.f.CharacterVarying(length=16)
             content = ep.f.FileField()
 
-        class RandomFile(ep.Object):
+        class Jpeg(ep.Object):
             title = ep.f.CharacterVarying(length=16)
-            content = ep.f.FileField()
+            content = ep.f.FileField(mimetype='image/jpeg')
 
+        self.Skit = Skit
+        self.Jpeg = Jpeg
         self.conn = get_test_conn()
         ep.set_context(self.conn)
         ep.start_session()
-        self.Skit = Skit
-        self.RandomFile = RandomFile
         parrot = Skit(title='parrot')
         ep.add(parrot)
         parrot.content.filename='parrot.txt'
@@ -37,6 +38,13 @@ class Test(unittest.TestCase):
         hungarian.content.filename='hungarian.txt'
         hungarian.content.mimetype='text/x-rst'
         hungarian.content.write(CONTENT_HUNGARIAN)
+        img = Jpeg(title='pythons')
+        ep.add(img)
+        img.content.export('pythons.yotpeg')
+        inquisition = Skit(title='inquisition')
+        ep.add(inquisition)
+        inquisition.content.filename='inquisition'
+        inquisition.content.write(CONTENT_INQUISITION)
         ep.commit()
 
     def tearDown(self):
@@ -91,4 +99,33 @@ class Test(unittest.TestCase):
         hungarian = self.Skit.get(2)
         self.assertEqual(hungarian.content.filename, 'hungarian.txt')
         self.assertEqual(hungarian.content.mimetype, 'text/x-rst')
+
+    def test_fixed_mime(self):
+        ep.start_session()
+        pythons = self.Jpeg.get(1)
+        self.assertEqual(pythons.content.filename, 'pythons.yotpeg')
+        self.assertEqual(pythons.content.mimetype, 'image/jpeg')
+        def broken():
+            pythons.content.mimetype = 'image/png'
+        self.assertRaises(AttributeError, broken)
         
+    def test_no_mime(self):
+        ep.start_session()
+        inquisition = self.Skit.get(3)
+        self.assertEqual(
+            inquisition.content.mimetype, 'application/octet-stream'
+        )
+
+    def test_assigment(self):
+        ep.start_session()
+        inquisition = self.Skit.get(3)
+        def broken():
+            inquisition.content = 'xxx'
+        self.assertRaises(AttributeError, broken)
+
+    def test_not_added(self):
+        parrot2 = self.Skit(title='parrot2')
+        def broken():
+            parrot2.content.write(CONTENT_PARROT)
+        self.assertRaises(ep.object.exc.LifecycleError, broken)
+

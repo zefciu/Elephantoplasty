@@ -19,8 +19,9 @@ class TracedLObject(lobject):
         self.connection.save()
         return result
 
-    def export(self, *args, **kwargs):
-        result = super(TracedLObject, self).write(*args, **kwargs)
+    def export(self, filename, *args, **kwargs):
+        result = super(TracedLObject, self).export(filename, *args, **kwargs)
+        self.filename = filename
         self.connection.save()
         return result
 
@@ -48,6 +49,10 @@ class TracedLObject(lobject):
 
     @mimetype.setter
     def mimetype(self, value):
+        if self.fixed_mimetype:
+            raise AttributeError(
+                "This field's mimetype is fixed to {0}".format(self._mimetype)
+            )
         self._mimetype = value
             
 
@@ -91,7 +96,8 @@ PostgreSQL large objects, so the files are limited to 2GB."""
                     lazy.oid, 'rw', 0, None, TracedLObject
                 )
                 real.filename = lazy.filename
-                real.mimetype = lazy.mimetype
+                real._mimetype = lazy.mimetype
+                real.fixed_mimetype = lazy.fixed_mimetype
                 inst._current[self.name] = real
             return inst._current[self.name]
 
@@ -108,6 +114,11 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             )
             inst._current[self.name] = fobj
         fobj.connection=inst.session.connection
+        if self.fixed_mimetype:
+            fobj.fixed_mimetype = True
+            fobj._mimetype = self.fixed_mimetype
+        else:
+            fobj.fixed_mimetype = False
         fobj.inst = inst
         fobj.name = self.name
         return fobj
@@ -118,12 +129,6 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             fobj.unlink()
 
 
-    def _get_mimetype(self, col_vals):
-        if self.fixed_mimetype is not None:
-            return self.fixed_mimetype
-        else:
-            return col_vals[self.mime_column.name]
-
     def hydrate(self, inst, col_vals, dict_, session):
         if col_vals[self.oid_column.name] is None:
             dict_[self.name] = None
@@ -131,20 +136,28 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             dict_[self.name] = _LazyLObject(
                 oid = col_vals[self.oid_column.name],
                 filename = col_vals[self.filename_column.name],
-                mimetype = col_vals[self.mime_column.name],
             )
+            if not self.fixed_mimetype:
+                dict_[self.name].mimetype =\
+                    col_vals[self.mime_column.name]
+                dict_[self.name].fixed_mimetype = False
+            else:
+                dict_[self.name].mimetype = self.fixed_mimetype
+                dict_[self.name].fixed_mimetype = True
+
 
     def get_c_vals(self, dict_):
         if self.name in dict_ and dict_[self.name] is not None:
             fobj = dict_[self.name]
-            return {
+            result = {
                 self.oid_column.name: fobj.oid,
                 self.filename_column.name: fobj.filename,
-                self.mime_column.name: fobj.mimetype,
             }
+            if not self.fixed_mimetype:
+                result[self.mime_column.name] = fobj.mimetype
+            return result
         else:
             return {
                 self.oid_column.name: None,
                 self.filename_column.name: None,
-                self.mime_column.name: None,
             }
