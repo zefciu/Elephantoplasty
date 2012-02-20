@@ -6,7 +6,7 @@ from psycopg2 import ProgrammingError
 from eplasty.field import Field
 # from eplasty.relation import Relation 
 from eplasty.util import clsname2tname, index_cmd
-from eplasty.ctx import get_cursor
+from eplasty.ctx import get_cursor, get_connection
 from psycopg2.errorcodes import UNDEFINED_TABLE
 from eplasty.field import SimplePK
 from .const import UNCHANGED
@@ -75,6 +75,7 @@ selecting a table name"""
 
     def create_table(cls, ctx = None): #@NoSelf
         cursor = get_cursor(ctx)
+        connection = get_connection(ctx)
         column_decls = []
         columns = it.chain(*[field.columns for field in cls.fields])
         constraints = sum([field.constraints for field in cls.fields], [])
@@ -102,19 +103,20 @@ selecting a table name"""
                 cursor.execute(command, args)
                 break
             except ProgrammingError as err:
-                cursor.connection.rollback_clean()
                 if err.pgcode == UNDEFINED_TABLE and not retried:
+                    cursor.connection.rollback_clean()
                     for col in cls.columns:
                         if col.references is not None:
                             col.references.create_table()
                             retried = True
                             break
                 else:
+                    cursor.connection.rollback()
                     raise
         for index in cls.indexes:
             cursor.execute(index_cmd(cls.__table_name__, index), [])
 
-        cursor.connection.commit()
+        cursor.connection.save()
 
     def add_field(cls, name, field): #@NoSelf
         field.bind_class(cls, name)

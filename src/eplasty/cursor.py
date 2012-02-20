@@ -27,8 +27,9 @@ class EPConnection(psycopg2.extensions.connection):
     """Connection class that creates logging cursors"""
 
     def __init__(self, *args, **kwargs):
-        self.savepoint = None
-        return super(EPConnection, self).__init__(*args, **kwargs)
+        result =  super(EPConnection, self).__init__(*args, **kwargs)
+        self.save()
+        return result
 
     def cursor(self, *args, **kwargs):
         kwargs.setdefault('cursor_factory', EPCursor)
@@ -42,10 +43,6 @@ class EPConnection(psycopg2.extensions.connection):
         self.savepoint = 'clean'
 
     def rollback_clean(self):
-        if self.savepoint is not None:
-            self.cursor().execute(
-                'ROLLBACK TO SAVEPOINT {0}'.format(self.savepoint)
-            )
-        else:
-            self.rollback()
-
+        self.cursor().execute(
+            'ROLLBACK TO SAVEPOINT {0};'.format(self.savepoint)
+        )

@@ -1,3 +1,4 @@
+import os
 import functools as ft
 import mimetypes as mt
 
@@ -19,11 +20,14 @@ class TracedLObject(lobject):
         self.connection.save()
         return result
 
-    def export(self, filename, *args, **kwargs):
-        result = super(TracedLObject, self).export(filename, *args, **kwargs)
-        self.filename = filename
-        self.connection.save()
-        return result
+    def import_(self, filename):
+        self.filename = os.path.basename(filename)
+        with open(filename, 'r') as f:
+            while True:
+                chunk = f.read(4096)
+                if not chunk:
+                    break
+                self.write(chunk)
 
     def unlink(self):
         self.inst._current[self.name] = None

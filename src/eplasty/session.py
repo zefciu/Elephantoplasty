@@ -27,6 +27,7 @@ and are able to flush them to database
             self.connection.rollback_clean()
         else:
             self.connection.rollback()
+            self.connection.savepoint = None
         for object_ in self.objects:
             object_._flushed = False
 
