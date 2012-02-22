@@ -2,6 +2,12 @@ try:
     import unittest2 as unittest
 except ImportError:
     import unittest
+
+try:
+    import webtest
+except ImportError:
+    webtest = None
+
 import os
 from psycopg2 import OperationalError, ProgrammingError
 
@@ -305,7 +311,22 @@ class Test(unittest.TestCase):
         self.assertRaises(AttributeError, broken)
 
     def test_not_added(self):
+        ep.start_session()
         parrot2 = self.Skit(title='parrot2')
         def broken():
             parrot2.content.write(CONTENT_PARROT)
         self.assertRaises(ep.object.exc.LifecycleError, broken)
+
+    @unittest.skipIf(webtest is None, u'No WebTest, skipping serve() test')
+    def test_serve(self):
+        ep.start_session()
+        pythons = self.Jpeg.get(1)
+        app = webtest.TestApp(pythons.content.serve())
+        res = app.get('/')
+        with open(os.path.join(HERE, 'pythons.yotpeg'), 'r') as f:
+            self.assertEqual(res.body, f.read())
+            self.assertEqual(
+                res.headers['Content-Disposition'], 
+                'attachment; filename="pythons.yotpeg"'
+            )
+            self.assertEqual(res.headers['Content-Type'], 'image/jpeg')

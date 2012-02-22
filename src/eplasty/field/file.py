@@ -40,6 +40,23 @@ class TracedLObject(lobject):
         self.seek(pos, 0)
         return result
 
+    def serve(self):
+        """Returns a WSGI app that serves this file"""
+        def app(environ, start_response):
+            start_response('200 OK', [
+                ('Content-Type', self.mimetype),
+                ('Content-Size', str(self.get_size())),
+                ('Content-Disposition', 'attachment; filename="{0}"'.format(
+                    self.filename
+                ))
+            ])
+            while True:
+                chunk = self.read(4096)
+                if not chunk:
+                    return
+                yield chunk
+        return app
+
     @property
     def mimetype(self):
         if self._mimetype is not None:
