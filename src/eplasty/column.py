@@ -1,5 +1,7 @@
 """Base classes for columns"""
 import abc
+from sys import version_info
+from numbers import Integral
 
 class Column(object):
     """
@@ -91,7 +93,12 @@ class CharacterVarying(Column):
     pgtype = 'character varying'
     compat_types = [str]
 
+class Text(Column):
+    """PostgreSQL text type"""
+    pgtype = 'text'
+    compat_types = [str]
+
 class OID(Column):
     """PostgreSQL oid type"""
     pgtype = 'oid'
-    compat_types = [int, long]
+    compat_types = [Integral]
