@@ -22,7 +22,7 @@ class TracedLObject(lobject):
 
     def import_(self, filename):
         self.filename = os.path.basename(filename)
-        with open(filename, 'r') as f:
+        with open(filename, 'rb') as f:
             while True:
                 chunk = f.read(4096)
                 if not chunk:
@@ -105,7 +105,7 @@ PostgreSQL large objects, so the files are limited to 2GB."""
 
     def __set__(self, inst, value):
         raise AttributeError(
-            u'Assignment to FileFields is unsupported. Write to the file'
+            'Assignment to FileFields is unsupported. Write to the file'
             'instead.'
         )
 
@@ -113,8 +113,9 @@ PostgreSQL large objects, so the files are limited to 2GB."""
         if self.name in inst._current and inst._current[self.name] is not None:
             if isinstance(inst._current[self.name], _LazyLObject):
                 lazy = inst._current[self.name]
+                mode = 'rw' if lazy.mimetype.split('/')[0] == 'text' else 'rwb'
                 real = inst.session.connection.lobject(
-                    lazy.oid, 'rw', 0, None, TracedLObject
+                    lazy.oid, mode, 0, None, TracedLObject
                 )
                 real.filename = lazy.filename
                 real._mimetype = lazy.mimetype

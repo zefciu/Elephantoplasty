@@ -1,7 +1,7 @@
 import os
 import logging
 
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 from psycopg2 import connect
 
 import eplasty as ep
@@ -12,7 +12,7 @@ config_file = os.path.join(
     'test.ini',
 )
 
-config = SafeConfigParser()
+config = ConfigParser()
 config.read(config_file)
 handler = logging.FileHandler('tests.log', 'w')
 sql_logger = logging.getLogger('eplasty.queries.sql')
@@ -23,10 +23,10 @@ err_logger.addHandler(handler)
 def get_test_conn():
     
     return connect(
-        host = config.get('db', 'host'),
-        port = config.get('db', 'port'),
-        database = config.get('db', 'database'),
-        user = config.get('db', 'user'),
-        password = config.get('db', 'password'),
+        host = config['db']['host'],
+        port = config['db']['port'],
+        database = config['db']['database'],
+        user = config['db']['user'],
+        password = config['db']['password'],
         connection_factory=ep.cursor.EPConnection
     )

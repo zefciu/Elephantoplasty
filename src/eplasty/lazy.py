@@ -32,7 +32,7 @@ class LazyManyToMany(object):
         self.primary_iter = iter(self.primary_result)
         return self
 
-    def next(self):
+    def __next__(self):
         """Get next object"""
         primary = next(self.primary_iter)
         return getattr(primary, self.relation.foreign_fk)

@@ -41,6 +41,6 @@ class Test(unittest.TestCase):
             thread.join()
         for thread in threads:
             if thread.conflicted:
-                raise AssertionError(u'Thread conflict!')
+                raise AssertionError('Thread conflict!')
 
 

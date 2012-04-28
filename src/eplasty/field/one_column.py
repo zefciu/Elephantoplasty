@@ -2,8 +2,7 @@
 from abc import ABCMeta
 from .base import Field
 
-class OneColumn(Field):
-    __metaclass__ = ABCMeta
+class OneColumn(Field, metaclass=ABCMeta):
     '''
     Base class for all field that just proxy one column
     '''

@@ -44,7 +44,7 @@ class queue_iterator(object):
     def __iter__(self):
         return self
     
-    def next(self):
+    def __next__(self):
         try:
             return self.list_.pop(0)
         except IndexError:
@@ -95,7 +95,7 @@ class _TraceableOverride(object):
         return result
 
     def __get__(self, inst, type):
-        return types.MethodType(self, inst, type)
+        return types.MethodType(self, inst)
 
 for method_name in ['pop', 'insert', 'append']:
     setattr(TraceableList, method_name, _TraceableOverride(method_name))

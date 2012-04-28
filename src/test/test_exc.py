@@ -86,7 +86,7 @@ class Test(unittest.TestCase):
             eggs = BrokenField()
         try:
             Spam.create_table()
-        except ProgrammingError, err:
+        except ProgrammingError as err:
             conn.rollback()
             self.assertEqual(err.pgcode, UNDEFINED_OBJECT)
 

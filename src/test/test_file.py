@@ -317,13 +317,13 @@ class Test(unittest.TestCase):
             parrot2.content.write(CONTENT_PARROT)
         self.assertRaises(ep.object.exc.LifecycleError, broken)
 
-    @unittest.skipIf(webtest is None, u'No WebTest, skipping serve() test')
+    @unittest.skipIf(webtest is None, 'No WebTest, skipping serve() test')
     def test_serve(self):
         ep.start_session()
         pythons = self.Jpeg.get(1)
         app = webtest.TestApp(pythons.content.serve())
         res = app.get('/')
-        with open(os.path.join(HERE, 'pythons.yotpeg'), 'r') as f:
+        with open(os.path.join(HERE, 'pythons.yotpeg'), 'rb') as f:
             self.assertEqual(res.body, f.read())
             self.assertEqual(
                 res.headers['Content-Disposition'], 

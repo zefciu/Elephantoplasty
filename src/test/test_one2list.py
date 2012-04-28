@@ -4,7 +4,7 @@ except ImportError:
     import unittest
 
 import eplasty as ep
-from util import get_test_conn
+from .util import get_test_conn
 
 class Test(unittest.TestCase):
     """Tests for OneToList relation"""

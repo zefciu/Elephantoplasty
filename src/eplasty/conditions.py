@@ -3,9 +3,8 @@ import abc
 import itertools as it
 from eplasty.util import prepare_col
 
-class Condition(object):
+class Condition(object, metaclass=abc.ABCMeta):
     """Base class for conditions"""
-    __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
     def render(self):
@@ -23,7 +22,7 @@ class All(Condition):
 class Equals(Condition):
     """Simple equality condition"""
     def __init__(self, col_name, value):
-        if not isinstance(col_name, basestring):
+        if not isinstance(col_name, str):
             col_name = prepare_col(col_name)
         self.col_name = col_name
         self.value = value

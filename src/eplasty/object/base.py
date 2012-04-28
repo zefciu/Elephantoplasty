@@ -18,9 +18,8 @@ from eplasty.object.const import (
 from eplasty.util import prepare_col
 from eplasty.query import SelectQuery
 
-class Object(object):
+class Object(object, metaclass=ObjectMeta):
     """Parent class for all eplasty Object classes"""
-    __metaclass__ = ObjectMeta
     
     def __init__(self, **kwargs):
         if self._abstract:
@@ -94,7 +93,7 @@ class Object(object):
         
         for f, (was, is_) in diff: #@UnusedVariable
             cvals = f.get_c_vals(self._current)
-            for c, v in cvals.iteritems():
+            for c, v in cvals.items():
                 col_names.append('"{0}" = %s'.format(c))
                 col_values.append(v)
 

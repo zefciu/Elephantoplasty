@@ -3,12 +3,11 @@ import abc
 from sys import version_info
 from numbers import Integral
 
-class Column(object):
+class Column(object, metaclass=abc.ABCMeta):
     """
     Columns are lower level than fields. They represent 1:1 the columns
     of underlying database table
     """
-    __metaclass__ = abc.ABCMeta
     __slots__ = [
         'name', 'pgtype', 'length', 'attrs', 'owner_class',
         'owner'
