@@ -1,5 +1,6 @@
 """Base classes for columns"""
 import abc
+import datetime
 from sys import version_info
 from numbers import Integral
 
@@ -96,6 +97,16 @@ class Text(Column):
     """PostgreSQL text type"""
     pgtype = 'text'
     compat_types = [str]
+
+class DateTime(Column):
+    """PostgreSQL datetime type"""
+    pgtype = 'datetime'
+    compat_types = [datetime.datetime]
+
+class Date(Column):
+    """PostgreSQL datetype"""
+    pgtype = 'date'
+    compat_types = [datetime.date]
 
 class OID(Column):
     """PostgreSQL oid type"""

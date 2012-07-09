@@ -19,3 +19,12 @@ class Integer(Simple):
 
 class CharacterVarying(Simple):
     ColumnType = c.CharacterVarying
+
+class Text(Simple):
+    ColumnType = c.Text
+
+class DateTime(Simple):
+    ColumnType = c.DateTime
+
+class Date(Simple):
+    ColumnType = c.Date
