@@ -1,8 +1,9 @@
 """Session class definition"""
-from psycopg2 import ProgrammingError, InterfaceError
+from psycopg2 import ProgrammingError, InterfaceError, connect
 from psycopg2.errorcodes import UNDEFINED_TABLE
 
 from eplasty.util import queue_iterator
+from eplasty.cursor import EPConnection
 
 
 class Session(object):
@@ -11,8 +12,8 @@ The sessions are orm wrappers of connections. They store the objects
 and are able to flush them to database
     """
 
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, *args, **kwargs):
+        self.connection = self.create_connection(args, kwargs)
         self.cursors = []
         self.objects = []
         self.nopk_objects = {}
@@ -30,6 +31,19 @@ and are able to flush them to database
             self.connection.savepoint = None
         for object_ in self.objects:
             object_._flushed = False
+
+    def create_connection(self, args, kwargs):
+        if args:
+            if isinstance(args[0], EPConnection):
+                return args[0] 
+            elif isinstance(args[0], str):
+                return connect(args[0], connection_factory = EPConnection)
+            else:
+                raise TypeError('A session can be instantiated with a'
+                        'connection, a string or a set of keyword args')
+        else:
+            kwargs.setdefault('connection_factory', EPConnection)
+            return connect(**kwargs)
 
     def close(self):
         """Close the session and all underlying cursors"""
