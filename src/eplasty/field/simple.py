@@ -20,6 +20,12 @@ class Integer(Simple):
 class CharacterVarying(Simple):
     ColumnType = c.CharacterVarying
 
+class Character(Simple):
+    ColumnType = c.Character
+
+class ByteA(Simple):
+    ColumnType = c.ByteA
+
 class Text(Simple):
     ColumnType = c.Text
 

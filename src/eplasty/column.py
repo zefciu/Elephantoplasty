@@ -87,11 +87,20 @@ class BigInt(Column):
     pgtype = 'bigint'
     compat_types = [int]
 
+class Character(Column):
+    """PostgreSQL fixed character type"""
+    pgtype = 'character varying'
+    compat_types = [str]
 
 class CharacterVarying(Column):
     """PostgreSQL character varying type"""
     pgtype = 'character varying'
     compat_types = [str]
+
+class ByteA(Column):
+    """PostgreSQL bytea typaracter varying"""
+    pgtype = 'character varying'
+    compat_types = [bytes]
 
 class Text(Column):
     """PostgreSQL text type"""
