@@ -99,7 +99,7 @@ class CharacterVarying(Column):
 
 class ByteA(Column):
     """PostgreSQL bytea typaracter varying"""
-    pgtype = 'character varying'
+    pgtype = 'bytea'
     compat_types = [bytes]
 
 class Text(Column):
