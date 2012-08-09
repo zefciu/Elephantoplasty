@@ -43,6 +43,7 @@ class Column(object, metaclass=abc.ABCMeta):
         in SQL."""
         return '{0}.{1}'.format(self.owner_class.__table_name__, self.name)
 
+    @classmethod
     def _is_compatible(self, value):
         """Checks if python variable is compatible with this column."""
         for type_ in self.compat_types:
@@ -121,3 +122,14 @@ class OID(Column):
     """PostgreSQL oid type"""
     pgtype = 'oid'
     compat_types = [Integral]
+
+class Array(Column):
+    """An array of other PostgreSQL type"""
+    def __init__(self, *args, **kwargs):
+        itemtype = kwargs.pop('itemtype').ColumnType
+        self.itemtype = itemtype
+        self.pgtype = itemtype.pgtype+'[]'
+        super(Array, self).__init__(*args, **kwargs)
+
+    def _is_compatible(self, value):
+        return all([self.itemtype._is_compatible(item) for item in value])

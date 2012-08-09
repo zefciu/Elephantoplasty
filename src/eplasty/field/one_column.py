@@ -27,5 +27,3 @@ class OneColumn(Field, metaclass=ABCMeta):
 
     def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = col_vals[self.column.name]
-        
-

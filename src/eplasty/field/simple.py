@@ -34,3 +34,9 @@ class DateTime(Simple):
 
 class Date(Simple):
     ColumnType = c.Date
+
+class Array(Simple):
+    def __init__(self, *args, **kwargs):
+        self.itemtype = kwargs['itemtype']
+        super(Array, self).__init__(*args, **kwargs)
+    ColumnType = c.Array
