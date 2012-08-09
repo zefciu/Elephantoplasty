@@ -2,7 +2,7 @@ import unittest
 
 from eplasty import field as f
 from eplasty import Object
-from eplasty.ctx import set_context, start_session, commit, add, get_connection
+from eplasty.ctx import set_context, start_session, commit, add, get_connection, get_session
 from .util import get_test_conn
 from eplasty.object import NotFound, TooManyFound
 from eplasty.object.exc import LifecycleError
@@ -24,6 +24,8 @@ class Test(unittest.TestCase):
     def setUp(self):
         
         class Knight(Object):
+            set_context(get_test_conn())
+            start_session()
             title = f.CharacterVarying(
                 length = 5, null = False, default = 'Sir'
             )
@@ -33,10 +35,7 @@ class Test(unittest.TestCase):
             
         self.Knight = Knight
         self.root = Root()
-        Traverser(self.Knight, 'name').mount(self.root, 'knights')
-        set_context(get_test_conn())
-        start_session()
-        # Knight.create_table()
+        Traverser(class_=self.Knight, field='name', session=get_session()).mount(self.root, 'knights')
         
         for ktup in [
             ('Sir', 'Galahad', 'The Pure', 10),
