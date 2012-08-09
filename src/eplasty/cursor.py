@@ -28,7 +28,7 @@ class EPConnection(psycopg2.extensions.connection):
 
     def __init__(self, *args, **kwargs):
         result =  super(EPConnection, self).__init__(*args, **kwargs)
-        self.save()
+        self.savepoint = None
         return result
 
     def cursor(self, *args, **kwargs):
@@ -43,6 +43,9 @@ class EPConnection(psycopg2.extensions.connection):
         self.savepoint = 'clean'
 
     def rollback_clean(self):
-        self.cursor().execute(
-            'ROLLBACK TO SAVEPOINT {0};'.format(self.savepoint)
-        )
+        if self.savepoint:
+            self.cursor().execute(
+                'ROLLBACK TO SAVEPOINT {0};'.format(self.savepoint)
+            )
+        else:
+            self.rollback()
