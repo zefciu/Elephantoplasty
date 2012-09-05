@@ -8,7 +8,6 @@ from psycopg2.errorcodes import UNDEFINED_TABLE
 from eplasty.ctx import get_session
 from eplasty.result import Result
 from eplasty.lazy import LazyQuery
-from eplasty import conditions as cond
 
 from eplasty.object.meta import ObjectMeta
 from eplasty.object.exc import NotFound, TooManyFound
@@ -20,6 +19,7 @@ from eplasty.query import SelectQuery
 
 class Object(object, metaclass=ObjectMeta):
     """Parent class for all eplasty Object classes"""
+
     
     def __init__(self, **kwargs):
         if self._abstract:
@@ -158,6 +158,7 @@ Flush this object to database using given cursor
     @classmethod
     def _get_conditions(cls, *args, **kwargs):
         """Reformats args and kwargs to a ``Condition`` object"""
+        from eplasty import conditions as cond
         args = list(args)
         # for k, v in kwargs.items():
         #     args.append(cond.Equals(k, v))
@@ -180,12 +181,12 @@ Flush this object to database using given cursor
         
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):
+        from eplasty import conditions as cond
         args = list(args)
         session = get_session(session)
         cached =  session.find_cached(cls.__table_name__, id)
         if cached:
             return cached
-        
         if isinstance(id, cond.Condition):
             args.append(id)
         elif id is not None:
@@ -264,7 +265,7 @@ Flush this object to database using given cursor
         """Sets the current session"""
         self.session = session
         for f in self.fields:
-            f.bind_session(session)
+            f.bind_session(self, session)
         session.add(*self.temporary)
         self.temporary = []
 

@@ -1,6 +1,6 @@
 from eplasty.object.const import DELETED, UNCHANGED, UPDATED, MODIFIED
 from eplasty.object.exc import LifecycleError
-from eplasty import conditions as cond
+from eplasty import conditions
 
 class Field(object):
     """
@@ -58,7 +58,7 @@ class Field(object):
         pass
 
     def __eq__(self, other):
-        return cond.Equals(self.column, other)
+        return conditions.Equals(self.column, other)
     
     def get_dependencies(self, dict_):
         """
@@ -67,6 +67,6 @@ class Field(object):
         """
         return []
 
-    def bind_session(self, session):
+    def bind_session(self, owner, session):
         """Do whatever needed when owner is added to session. Default NOP"""
         pass

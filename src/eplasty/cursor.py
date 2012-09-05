@@ -3,6 +3,13 @@ import logging
 
 import psycopg2
 
+def _hide_problematic(item):
+    """Converts items that can spoil logs to different form."""
+    if isinstance(item, bytes):
+        return '<{0} BYTES>'.format(len(item))
+    return item
+
+
 class EPCursor(psycopg2.extensions.cursor):
     """Custom cursor class that performs logging"""
 
@@ -16,8 +23,12 @@ class EPCursor(psycopg2.extensions.cursor):
         #self.unad_logger.info(sql)
         #self.unad_logger.info(args)
         try:
+            args_to_log = (
+                args and tuple((_hide_problematic(item) for item in args))
+            )
             command = self.mogrify(sql, args)
-            self.sql_logger.info(command)
+            command_to_log = self.mogrify(sql, args_to_log)
+            self.sql_logger.info(command_to_log)
             super(EPCursor, self).execute(command)
         except Exception as exc:
             self.err_logger.error(exc)
