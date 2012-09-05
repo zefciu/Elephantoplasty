@@ -13,6 +13,7 @@ class Blob(Field):
 
     def __init__(self, mimetype=None):
         self.fixed_mimetype = mimetype
+        super(Blob, self).__init__()
 
     def bind_class(self, cls, name):
         namec = ft.partial(str.format, '{0}_{1}', name)
@@ -25,12 +26,6 @@ class Blob(Field):
         super(Blob, self).bind_class(cls, name)
         return self
 
-    def __get__(self, inst, cls):
-        if inst and not inst._current.get(self.name):
-            return BlobData(None, self.fixed_mimetype, None)
-        else:
-            return super(Blob, self).__get__(inst, cls)
-
     def hydrate(self, inst, col_vals, dict_, session):
         if col_vals[self.blob_column.name] is None:
             dict_[self.name] = None
@@ -39,11 +34,12 @@ class Blob(Field):
                 mimetype = self.fixed_mimetype
             else:
                 mimetype = col_vals[self.mime_column.name]
-        dict_[self.name] = BlobData(
-            col_vals[self.blob_column.name].tobytes(),
-            mimetype,
-            col_vals[self.filename_column.name],
-        )
+            blob_data = col_vals[self.blob_column.name]
+            dict_[self.name] = BlobData(
+                blob_data and blob_data.tobytes(),
+                mimetype,
+                col_vals[self.filename_column.name],
+            )
 
     def get_c_vals(self, dict_):
         obj = dict_.get(self.name)

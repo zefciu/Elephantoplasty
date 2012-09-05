@@ -16,6 +16,8 @@ class Test(unittest.TestCase):
     def setUp(self):
         class Image(ep.Object):
             image = ep.f.Image()
+            thumb = ep.f.Thumb(origin=image, size=(100, 100))
+
         self.Image = Image
         self.conn = get_test_conn()
         ep.set_context(self.conn)
@@ -37,5 +39,6 @@ class Test(unittest.TestCase):
         ep.start_session()
         pythons = self.Image.get(1)
         img = pythons.image
+        thumb = pythons.thumb
         self.assertEqual(img.width, 640)
-
+        self.assertEqual(thumb.width, 100)
