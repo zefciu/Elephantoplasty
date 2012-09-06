@@ -1,5 +1,6 @@
 """Object metaclass definition"""
 import itertools as it
+from collections import OrderedDict
 
 from psycopg2 import ProgrammingError
 
@@ -31,6 +32,9 @@ class ObjectMeta(type):
 
         
         super(ObjectMeta, cls).__init__(classname, bases, dict_)
+
+    def __prepare__(classname, bases):
+        return OrderedDict()
         
     def _setup_non_abstract(cls, classname, bases, dict_, fields): #@NoSelf
         """Setups the non-abstract class creating primary key if needed and
@@ -129,16 +133,26 @@ selecting a table name"""
         field.prepare()
         return field
 
-    def hydrate(cls, tup, session): #@NoSelf
+    def hydrate(cls, tup, session, fields=None): #@NoSelf
         """Hydrates the object from given tuple"""
         self = cls.__new__(cls)
         lst = list(tup)
         col_vals = {}
         self._current = {}
-        for col in it.chain(self.columns, self.inh_columns):
+        if fields is not None:
+            fields = [
+                field for field in it.chain(self.fields, self.inh_fields)
+                if field.name in fields
+            ]
+            columns = sum((field.columns for field in fields), [])
+        else:
+            fields = self.fields
+            columns = it.chain(self.columns, self.inh_columns)
+
+        for col in columns:
             col_vals[col.name] = col.hydrate(lst.pop(0), session)
 
-        for f in self.fields:
+        for f in fields:
             f.hydrate(self, col_vals, self._current, session)
 
         self._initial = self._current.copy()

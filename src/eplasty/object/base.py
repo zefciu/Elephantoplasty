@@ -169,12 +169,16 @@ Flush this object to database using given cursor
         return cond.And(*args)
     
     @classmethod
-    def _get_query(cls, condition, order):
+    def _get_query(cls, condition, order, fields=None):
         """Returns tuple to be executed for this class and given
         ``condition``"""
+        if fields is None:
+            columns = cls.columns
+        else:
+            columns = sum((getattr(cls, field).columns for field in fields), [])
         return SelectQuery(
             cls.__table_name__,
-            columns = cls.columns,
+            columns = columns,
             condition = condition,
             order = order,
         ).render()
@@ -226,13 +230,14 @@ Flush this object to database using given cursor
         tmp_cursor = session.cursor()
         condition = cls._get_conditions(*args, **kwargs)
         
-        order = kwargs.get('order', [])
-        query = cls._get_query(condition, order)
+        order = kwargs.pop('order', [])
+        fields = kwargs.pop('fields', None)
+        query = cls._get_query(condition, order, fields)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
         cursor = session.cursor()
         cursor.execute(*query)
         
-        return Result(session, cursor, cls)
+        return Result(session, cursor, cls, fields)
         
     
     @classmethod

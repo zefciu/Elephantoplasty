@@ -11,9 +11,10 @@ class OneToList(Relation):
     """Listlike relation. It is intended to behave fully as persistent pythonic
     list . """
 
-    def __init__(self, foreign_class, backref=None):
+    def __init__(self, foreign_class, backref=None, fields=None):
         self.foreign_class = foreign_class
         self.backref = backref
+        self.fields = fields
         super(OneToList, self).__init__()
 
     # def bind_class(self, cls, name):
@@ -40,7 +41,8 @@ class OneToList(Relation):
             Equals(
                 self.foreign_field.column.name, inst.get_pk_value()
             ), order = [(self.foreign_field.order_column, 'ASC')],
-            session = session
+            session = session,
+            fields = self.fields
         )
 
     def _resolve_diff(self, inst, prev, curr):
