@@ -26,7 +26,7 @@ class AdapterField(OneColumn):
         else:
             return {}
 
-    def hydrate(self, inst, col_vals, session):
+    def hydrate(self, inst, col_vals, dict_, session):
         dict_[self.name] = self.to_python(col_vals[self.column.name])
 
 class Missing:
