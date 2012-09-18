@@ -235,7 +235,14 @@ Flush this object to database using given cursor
         query = cls._get_query(condition, order, fields)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
         cursor = session.cursor()
-        cursor.execute(*query)
+        try:
+            cursor.execute(*query)
+        except ProgrammingError as err:
+            if err.pgcode == UNDEFINED_TABLE:
+                session._rollback(True)
+                return []
+            else:
+                raise
         
         return Result(session, cursor, cls, fields)
         
