@@ -32,6 +32,7 @@ class Test(unittest.TestCase):
         self.conn.rollback()
         try:
             self.conn.cursor().execute('DROP TABLE images;')
+            self.conn.commit()
         except ProgrammingError:
             pass
 

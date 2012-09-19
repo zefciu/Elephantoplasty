@@ -16,7 +16,7 @@ class Field(object):
 
     def __init__(self, *args, **kwargs):
 #        self.kwargs = kwargs
-        # Dependent fields need to be erased when this field is set
+        # Dependent fields need to change value when this field is set
         self.dependent_fields = []
         if 'default' in kwargs:
             self._default = kwargs['default']
@@ -42,7 +42,7 @@ class Field(object):
             if self._is_compatible(v):
                 inst._current[self.name] = v
                 for field in self.dependent_fields:
-                    field.__set__(inst, None)
+                    field.set_dependent(inst, v)
                 inst.touch()
             else:
                 raise TypeError('Type {0} is incompatible with field {1}'.format(

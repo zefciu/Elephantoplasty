@@ -41,17 +41,13 @@ class Thumb(Image):
         self.origin = origin
         super(Thumb, self).__init__(*args, **kwargs)
 
-    def __get__(self, inst, cls):
-        result = super(Thumb, self).__get__(inst, cls)
-        if result is not None:
-            return result
-        img = self.origin.__get__(inst, cls)
-        if img is None:
-            return img
+    def set_dependent(self, inst, img):
         to_width, to_height = self.size
         factor = min(to_width/img.width, to_height/img.height)
+        filename = 'thumb_' + img.filename
+        img = img.copy()
         if factor < 1:
-            img = img.copy()
             img.rescale(factor=factor)
+        img.filename = filename
         self.__set__(inst, img)
         return img

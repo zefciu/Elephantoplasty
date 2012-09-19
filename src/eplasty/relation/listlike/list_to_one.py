@@ -46,7 +46,10 @@ class ListToOne(Relation):
             name=self.column.name, f_table=self.foreign_class.__table_name__,
             f_column=self.foreign_pk.name
         )
-        self.indexes = [('order_index', [name, self.order_column.name])]
+        self.indexes = [(
+            '{0}_{1}_order_index'.format(cls.__name__, name),
+            [name, self.order_column.name]
+        )]
         return self
 
     @property
