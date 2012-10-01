@@ -8,6 +8,7 @@ from eplasty.field import Field
 # from eplasty.relation import Relation 
 from eplasty.util import clsname2tname, index_cmd
 from eplasty.ctx import get_cursor, get_connection
+from eplasty.paging import Pager
 from psycopg2.errorcodes import UNDEFINED_TABLE
 from eplasty.field import SimplePK
 from .const import UNCHANGED
@@ -160,3 +161,6 @@ selecting a table name"""
         self._flushed = False
 
         return self
+
+    def paginate(cls, *args, **kwargs):
+        return Pager(cls, *args, **kwargs)

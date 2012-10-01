@@ -169,7 +169,9 @@ Flush this object to database using given cursor
         return cond.And(*args)
     
     @classmethod
-    def _get_query(cls, condition, order, fields=None):
+    def _get_query(
+        cls, condition, order, fields=None, limit=None, offset=None
+    ):
         """Returns tuple to be executed for this class and given
         ``condition``"""
         if fields is None:
@@ -177,10 +179,8 @@ Flush this object to database using given cursor
         else:
             columns = sum((getattr(cls, field).columns for field in fields), [])
         return SelectQuery(
-            cls.__table_name__,
-            columns = columns,
-            condition = condition,
-            order = order,
+            cls.__table_name__, columns = columns, condition = condition,
+            order = order, limit=limit, offset=offset,
         ).render()
         
     @classmethod
@@ -232,7 +232,9 @@ Flush this object to database using given cursor
         
         order = kwargs.pop('order', [])
         fields = kwargs.pop('fields', None)
-        query = cls._get_query(condition, order, fields)
+        limit = kwargs.pop('limit', None)
+        offset = kwargs.pop('offset', None)
+        query = cls._get_query(condition, order, fields, limit, offset)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
         cursor = session.cursor()
         try:

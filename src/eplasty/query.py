@@ -10,19 +10,21 @@ class SelectQuery(object):
           (SELECT CLAUSE)
         * joins - joins as a list of joins as tuples
           in format (join type, table name, ON condtion)
+        * limit - an integer or None for no limit
+        * offset - an integer or None for no offset
     """
-
-    __slots__ = ['from_', 'condition', 'columns', 'joins', 'order']
 
     def __init__(
         self, from_, condition=ep.conditions.All(), columns='*', joins=False,
-        order = None
+        order=None, limit=None, offset=None
     ):
         self.from_ = from_
         self.condition = condition
         self.columns = columns
         self.joins = joins or []
         self.order = order or []
+        self.limit = limit
+        self.offset = offset
 
     def _render_columns(self):
         """Renders the SELECT clause"""
@@ -70,16 +72,33 @@ class SelectQuery(object):
         else:
             return ''
 
+    def _render_limit_offset(self):
+        """Renders the limit and offset clauses as a tuple.
+        Can return an empty string + empty tuple."""
+        result_string = []
+        result_vars = []
+        if self.limit:
+            result_string.append('LIMIT %s')
+            result_vars.append(self.limit)
+        if self.offset:
+            result_string.append('OFFSET %s')
+            result_vars.append(self.offset)
+        if result_string:
+            return (' ' + ' '.join(result_string), tuple(result_vars))
+        else:
+            return ('', tuple())
+
     def render(self):
         """Renders the query"""
         select_clause = self._render_columns()
         from_clause, from_vars = self._render_from()
         where_clause, where_vars = self.condition.render()
         order_clause = self._render_order()
+        limit_offset_clause, limit_offset_vars = self._render_limit_offset()
         return (
             (
                 'SELECT {select_clause} FROM {from_clause}'
-                ' WHERE {where_clause}{order_clause};'
+                ' WHERE {where_clause}{order_clause}{limit_offset_clause};'
             ).format(**locals()),
-            where_vars
+            where_vars + limit_offset_vars
         )
