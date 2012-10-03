@@ -268,18 +268,21 @@ class Test(unittest.TestCase):
         self.assertEqual(parrot.content.tell(), 10)
 
     def test_mime(self):
+        """Test if you can get a guessed mimetype"""
         ep.start_session()
         parrot = self.Skit.get(1)
         self.assertEqual(parrot.content.filename, 'parrot.txt')
         self.assertEqual(parrot.content.mimetype, 'text/plain')
 
     def test_forced_mime(self):
+        """Test if you can force the mime to be other than guessed one"""
         ep.start_session()
         hungarian = self.Skit.get(2)
         self.assertEqual(hungarian.content.filename, 'hungarian.txt')
         self.assertEqual(hungarian.content.mimetype, 'text/x-rst')
 
     def test_fixed_mime(self):
+        """Test if you can fix a mime for a field"""
         ep.start_session()
         pythons = self.Jpeg.get(1)
         self.assertEqual(pythons.content.filename, 'pythons.yotpeg')
@@ -289,6 +292,7 @@ class Test(unittest.TestCase):
         self.assertRaises(AttributeError, broken)
 
     def test_import(self):
+        """Test if you can import a file content from the filesystem"""
         ep.start_session()
         pythons = self.Jpeg.get(1)
         self.assertEqual(pythons.content.get_size(), os.path.getsize(
@@ -297,6 +301,7 @@ class Test(unittest.TestCase):
 
         
     def test_no_mime(self):
+        """Test if without a mimetype we get application/octet-stream"""
         ep.start_session()
         inquisition = self.Skit.get(3)
         self.assertEqual(
@@ -304,6 +309,7 @@ class Test(unittest.TestCase):
         )
 
     def test_assigment(self):
+        """Ensure we can't use assignment to set the file field value"""
         ep.start_session()
         inquisition = self.Skit.get(3)
         def broken():
@@ -311,6 +317,7 @@ class Test(unittest.TestCase):
         self.assertRaises(AttributeError, broken)
 
     def test_not_added(self):
+        """Ensure trying to write to a file without a session raises exc"""
         ep.start_session()
         parrot2 = self.Skit(title='parrot2')
         def broken():
@@ -319,6 +326,7 @@ class Test(unittest.TestCase):
 
     @unittest.skipIf(webtest is None, 'No WebTest, skipping serve() test')
     def test_serve(self):
+        """Test the WSGI feature of the file field."""
         ep.start_session()
         pythons = self.Jpeg.get(1)
         app = webtest.TestApp(pythons.content.serve())

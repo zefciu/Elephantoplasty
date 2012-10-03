@@ -6,12 +6,14 @@ class Test(unittest.TestCase):
 
 
     def test_tname(self):
+        """Test if the __table_name__ is set"""
         self.assertEqual(
             util.clsname2tname('RoundTableKnight'),
             'round_table_knights'
         )
         
     def test_tnamey(self):
+        """Test the __table_name__ is set correcly when singular ends with y"""
         self.assertEqual(
             util.clsname2tname('BitterCherry'),
             'bitter_cherries'

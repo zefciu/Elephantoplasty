@@ -43,7 +43,9 @@ if html:
         ColumnType = c.Text
 
         def to_python(self, value):
-            return html.fromstring(value)
+            result = html.fromstring(value)
+            result.render = lambda: html.tostring(result).decode('utf-8')
+            return result
 
         def from_python(self, value):
             return html.tostring(value, encoding='unicode')

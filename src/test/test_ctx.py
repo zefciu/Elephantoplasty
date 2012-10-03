@@ -23,17 +23,17 @@ class Test(unittest.TestCase):
 
 
     def test_set_with_connection(self):
+        """Test we can use connection to set ctx."""
         set_context(get_test_conn())
         get_cursor() #Passes when no error
         
     def test_set_with_cursor(self):
+        """Test we can use cursor to set ctx."""
         set_context(get_test_conn().cursor())
         get_cursor() #Passes when no error
         
-    def test_unset_connection(self):
-        self.assertRaises(CtxError, get_cursor)
-        
     def test_connect(self):
+        """Test we can use connect() method to set a ctx"""
         connect(
             host = config.get('db', 'host'),
             port = config.get('db', 'port'),
@@ -49,7 +49,7 @@ class Test(unittest.TestCase):
         self.assertEqual(conn, get_connection(conn))
         
     def test_no_connection(self):
-        """Behavior when no context present"""
+        """Test trying to use nonexistent ctx raises exc"""
         self.assertRaises(CtxError, lambda: get_connection())
         self.assertRaises(CtxError, lambda: get_cursor())
         self.assertRaises(CtxError, lambda: get_session())
@@ -57,24 +57,24 @@ class Test(unittest.TestCase):
         self.assertRaises(CtxError, lambda: add())
         
     def test_invalid_context(self):
-        """Set context with invalid value"""
+        """Test setting context with invalid value raises exc"""
         self.assertRaises(TypeError, lambda: set_context(1))
         
     def test_get_cursor_with_conn(self):
-        """Get cursor for connection"""
+        """Test getting cursor with a connection"""
         self.assertEqual(type(get_cursor(get_test_conn())), EPCursor)
         
     def test_get_cursor_with_cursor(self):
-        """Passing a cursor to get_cursor should return itself"""
+        """Test if passing a cursor to get_cursor returns itself"""
         cur = get_test_conn().cursor()
         self.assertEqual(get_cursor(cur), cur)
         
     def test_get_cursor_with_invalid(self):
-        """Passing invalid type to get_cursor"""
+        """Test passing invalid type to get_cursor raises exc"""
         self.assertRaises(TypeError, lambda: get_cursor(1))
         
     def test_get_session_with_session(self):
-        """Passing a session to get_session() should return itself"""
+        """Test passing a session to get_session() returns itself"""
         session = Session(get_test_conn())
         self.assertEqual(get_session(session), session)
         
