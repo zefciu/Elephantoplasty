@@ -8,17 +8,17 @@ class Column(object, metaclass=abc.ABCMeta):
     """
     Columns are lower level than fields. They represent 1:1 the columns
     of underlying database table
+    name: The postgres name for column
+    pgtype: The postgres datatype
+    length: The lengh option used with some datatypes
+    unique: Whether to create a UNIQUE index
     """
-    __slots__ = [
-        'name', 'pgtype', 'length', 'attrs', 'owner_class',
-        'owner'
-    ]
     compat_types = []
     pgtype = None
 
     def __init__(
         self, name=None, length=None, null=True, default=False,
-        references = None
+        references = None, unique=False
     ):
         self.name = name
         self.length = length
@@ -32,6 +32,9 @@ class Column(object, metaclass=abc.ABCMeta):
             self.pgattrs.append(('NOT NULL', []))
         else:
             self.compat_types.append(type(None))
+        self.unique = unique
+        if unique:
+            self.pgattrs.append(('UNIQUE', []))
 
         if default is not False:
             self.pgattrs.append(('DEFAULT %s', [default]))
