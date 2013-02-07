@@ -58,7 +58,8 @@ class ListToOne(Relation):
 
     def hydrate(self, ins, col_vals, dict_, session):
         dict_[self.name] = ListToOneRecord(LazyQuery(
-            self.foreign_class, 'get', col_vals[self.column.name]
+            self.foreign_class, 'get', col_vals[self.column.name],
+            session=session
         ), col_vals[self.order_column.name])
 
     def get_c_vals(self, dict_):
