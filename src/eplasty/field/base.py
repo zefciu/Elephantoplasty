@@ -13,6 +13,7 @@ class Field(object):
     indexes = []
     before_delete = None
     after_delete = None
+    cheap = True
 
     def __init__(self, *args, **kwargs):
 #        self.kwargs = kwargs

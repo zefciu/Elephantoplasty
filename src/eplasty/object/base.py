@@ -174,14 +174,13 @@ Flush this object to database using given cursor
     ):
         """Returns tuple to be executed for this class and given
         ``condition``"""
-        if fields is None:
-            columns = cls.columns
-        else:
-            columns = sum((getattr(cls, field).columns for field in fields), [])
+        fields = fields or [field.name for field in cls.fields if field.cheap]
+
+        columns = sum((getattr(cls, field).columns for field in fields), [])
         return SelectQuery(
             cls.__table_name__, columns = columns, condition = condition,
             order = order, limit=limit, offset=offset,
-        ).render()
+        ).render(), fields
         
     @classmethod
     def get(cls, id = None, session = None, *args, **kwargs):
@@ -201,8 +200,9 @@ Flush this object to database using given cursor
         
         condition = cls._get_conditions(*args, **kwargs)
         order = kwargs.get('order', [])
+        query, fields = cls._get_query(condition, order)
         try:
-            cursor.execute(*cls._get_query(condition, order))
+            cursor.execute(*query)
         except ProgrammingError as err:
             if err.pgcode == UNDEFINED_TABLE:
                 session._rollback(True)
@@ -212,7 +212,7 @@ Flush this object to database using given cursor
 
         
         if cursor.rowcount == 1:
-            r = cls.hydrate(cursor.fetchone(), session)
+            r = cls.hydrate(cursor.fetchone(), session, fields = fields)
             session.add(r)
             return r
         elif cursor.rowcount == 0:
@@ -234,7 +234,7 @@ Flush this object to database using given cursor
         fields = kwargs.pop('fields', None)
         limit = kwargs.pop('limit', None)
         offset = kwargs.pop('offset', None)
-        query = cls._get_query(condition, order, fields, limit, offset)
+        query, fields = cls._get_query(condition, order, fields, limit, offset)
         query_hash = b64encode(sha1(tmp_cursor.mogrify(*query)).digest())
         cursor = session.cursor()
         try:

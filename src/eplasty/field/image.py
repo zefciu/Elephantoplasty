@@ -4,6 +4,7 @@ from eplasty.field.blob import Blob, BlobData
 
 class Image(Blob):
     img_format = 'jpeg'
+    cheap = False
 
     def __init__(self, *args, **kwargs):
         super(Image, self).__init__(
