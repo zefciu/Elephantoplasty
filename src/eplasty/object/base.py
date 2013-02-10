@@ -183,7 +183,9 @@ Flush this object to database using given cursor
         ).render(), fields
         
     @classmethod
-    def get(cls, id = None, session = None, *args, **kwargs):
+    def get(cls, id = None, session = None, fields = None, *args, **kwargs):
+        if fields:
+            import pdb; pdb.set_trace()
         from eplasty import conditions as cond
         args = list(args)
         session = get_session(session)
@@ -200,7 +202,7 @@ Flush this object to database using given cursor
         
         condition = cls._get_conditions(*args, **kwargs)
         order = kwargs.get('order', [])
-        query, fields = cls._get_query(condition, order)
+        query, fields = cls._get_query(condition, order, fields)
         try:
             cursor.execute(*query)
         except ProgrammingError as err:
@@ -247,6 +249,24 @@ Flush this object to database using given cursor
                 raise
         
         return Result(session, cursor, cls, fields)
+
+    def _load_field(self, field):
+        """Load a field that wasn't fetched while object was loaded."""
+        from eplasty import conditions as cond
+        condition = cond.Equals(type(self).get_pk(), self.get_pk_value()) 
+        query, fields = self._get_query(condition, order = [], fields = [field.name])
+        cursor = self.session.cursor()
+        cursor.execute(*query)
+        row = cursor.fetchall()[0]
+        col_vals = {}
+        for col, col_val in zip(field.columns, row):
+            col_vals[col.name] = col.hydrate(col_val, self.session)
+        self.field_map[field.name].hydrate(
+            self, col_vals, self._current, self.session
+        )
+        
+
+
         
     
     @classmethod

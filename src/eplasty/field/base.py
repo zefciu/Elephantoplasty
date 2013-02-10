@@ -30,13 +30,21 @@ class Field(object):
         try:
             return inst._current[self.name]
         except KeyError:
-            try:
-                return self._default
-            except AttributeError:
-                raise AttributeError('The field {0} is neither set nor '
-                    'has default value'.format(
-                        self.name
-                    ))
+            if inst._status == UNCHANGED:
+                inst._load_field(self)
+                try:
+                    return inst._current[self.name]
+                except KeyError:
+                    raise AttributeError("Field {0} doesn't exist")
+            else:
+                try:
+                    return self._default
+                except AttributeError:
+                    _inst.load_field(self)
+                    raise AttributeError('The field {0} is neither set nor '
+                        'has default value'.format(
+                            self.name
+                        ))
 
     def __set__(self, inst, v):
         try:

@@ -66,6 +66,9 @@ selecting a table name"""
         ], [])
             
         cls.fields = fields
+        cls.field_map = dict(
+            ((field.name, field) for field in it.chain(cls.fields, cls.inh_fields))
+        )
 
 
         if '__table_name__' in dict_:
