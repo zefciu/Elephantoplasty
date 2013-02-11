@@ -129,6 +129,7 @@ selecting a table name"""
     def add_field(cls, name, field): #@NoSelf
         field.bind_class(cls, name)
         cls.fields.append(field)
+        cls.field_map[field.name] = field
         for column in field.columns:
             column.bind(cls)
         cls.columns += field.columns
@@ -145,9 +146,10 @@ selecting a table name"""
         self._current = {}
         if fields is not None:
             fields = [
-                field for field in it.chain(self.fields, self.inh_fields)
-                if field.name in fields
+                cls.field_map[field_name]
+                for field_name in fields if field_name in cls.field_map
             ]
+            print(fields)
             columns = sum((field.columns for field in fields), [])
         else:
             fields = self.fields

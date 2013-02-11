@@ -174,7 +174,15 @@ Flush this object to database using given cursor
     ):
         """Returns tuple to be executed for this class and given
         ``condition``"""
-        fields = fields or [field.name for field in cls.fields if field.cheap]
+        if fields:
+            if (
+                'id' in (field.name for field in cls.fields) and
+                'id' not in fields
+            ):
+                fields.append('id')
+
+        else:
+            fields = [field.name for field in cls.fields if field.cheap]
 
         columns = sum((getattr(cls, field).columns for field in fields), [])
         return SelectQuery(
@@ -264,10 +272,6 @@ Flush this object to database using given cursor
         self.field_map[field.name].hydrate(
             self, col_vals, self._current, self.session
         )
-        
-
-
-        
     
     @classmethod
     def get_pk(cls):

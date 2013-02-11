@@ -70,14 +70,15 @@ Test of eplasty's basic functionalities. Flat tables without inheritance.
         knights2.cursor.close()
 
     def test_find_some_cols(self):
-        """Basic test for find() classmethod with keyword syntax"""
+        """Basic test for find() classmethod only some fields"""
         knight = list(self.Knight.find(
             self.Knight.name == 'Galahad', fields=['title', 'nickname']))[0]
         self.assertEqual(knight.title, 'Sir')
         self.assertEqual(knight.nickname, 'The Pure')
-        def wrong():
-            return knight.name
-        self.assertRaises(AttributeError, wrong)
+        assert 'name' not in knight._current
+        # We still can get this value. Additional query will be performed
+        self.assertEqual(knight.name, 'Galahad')
+        assert 'name' in knight._current
 
     def test_find_alternative(self):
         """Test finding with == syntax"""

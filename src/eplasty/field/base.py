@@ -1,4 +1,4 @@
-from eplasty.object.const import DELETED, UNCHANGED, UPDATED, MODIFIED
+from eplasty.object.const import DELETED, UNCHANGED, UPDATED, MODIFIED, NEW
 from eplasty.object.exc import LifecycleError
 from eplasty import conditions
 
@@ -30,7 +30,7 @@ class Field(object):
         try:
             return inst._current[self.name]
         except KeyError:
-            if inst._status == UNCHANGED:
+            if inst._status != NEW:
                 inst._load_field(self)
                 try:
                     return inst._current[self.name]
@@ -40,7 +40,6 @@ class Field(object):
                 try:
                     return self._default
                 except AttributeError:
-                    _inst.load_field(self)
                     raise AttributeError('The field {0} is neither set nor '
                         'has default value'.format(
                             self.name

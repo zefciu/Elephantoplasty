@@ -83,6 +83,8 @@ class ManyToMany(Relation):
 
 
     def __get__(self, inst, cls):
+        if inst is None:
+            return self
         if isinstance(inst._current[self.name], LazyManyToMany):
             inst._current[self.name] = list(inst._current[self.name])
         inst._current[self.name] = RelationList(

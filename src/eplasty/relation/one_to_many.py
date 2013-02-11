@@ -75,6 +75,8 @@ class OneToMany(Relation):
 
 
     def __get__(self, inst, cls):
+        if inst is None:
+            return self
         if isinstance(inst._current[self.name], LazyQuery):
             inst._current[self.name] = inst._current[self.name]()
             if self.fmt == LIST:

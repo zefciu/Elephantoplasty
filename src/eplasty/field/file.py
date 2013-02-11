@@ -124,6 +124,8 @@ PostgreSQL large objects, so the files are limited to 2GB."""
             return inst._current[self.name]
 
     def __get__(self, inst, cls):
+        if inst is None:
+            return self
         if not inst.session:
             raise LifecycleError(
                 'You cannot write to FileFields that are not added to a'
