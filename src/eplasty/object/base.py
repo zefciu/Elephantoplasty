@@ -51,7 +51,11 @@ class Object(object, metaclass=ObjectMeta):
         r = []
         for f in self.fields:
             n = f.name
-            if self._initial[n] != self._current[n]:
+            if n in self._current and not n in self._initial:
+                self._load_field(n)
+            if (
+                n in self._current and self._initial[n] != self._current[n]
+            ):
                 r.append ((f, (self._initial[n], self._current[n])))
         return r
 
