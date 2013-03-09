@@ -6,7 +6,7 @@ with open('README.txt') as f:
 
 setup(
       name = 'Elephantoplasty',
-      version = '0.0.2',
+      version = '0.0.3',
       author = 'Szymon Pyżalski',
       author_email = 'zefciu <szymon@pythonista.net>',
       description = 'A PostgreSQL ORM',
