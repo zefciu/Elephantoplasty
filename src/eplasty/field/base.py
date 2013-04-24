@@ -21,6 +21,7 @@ class Field(object):
         self.dependent_fields = []
         if 'default' in kwargs:
             self._default = kwargs['default']
+        self.unique = kwargs.get('unique', False)
 
     def __get__(self, inst, cls):
         if inst is None:

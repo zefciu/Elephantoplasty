@@ -28,7 +28,7 @@ class Result(object):
     def __iter__(self):
         """Temporary solution I think"""
         return ResultIterator(self)
-    
+
     def fetch(self, count):
         """Fetch ``count`` objects"""
         tuple_list = self.cursor.fetchmany(count)
