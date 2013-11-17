@@ -6,7 +6,7 @@ with open('README.txt') as f:
 
 setup(
       name = 'Elephantoplasty',
-      version = '0.0.3',
+      version = '0.1',
       author = 'Szymon Pyżalski',
       author_email = 'zefciu <szymon@pythonista.net>',
       description = 'A PostgreSQL ORM',
@@ -24,7 +24,7 @@ setup(
           'eplasty.relation.listlike'
       ],
       classifiers = [
-          'Development Status :: 2 - Pre-Alpha',
+          'Development Status :: 3 - Alpha',
           'Intended Audience :: Developers',
           'License :: OSI Approved :: BSD License',
           'Programming Language :: Python :: 3',

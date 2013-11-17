@@ -26,6 +26,9 @@ class Character(Simple):
 class ByteA(Simple):
     ColumnType = c.ByteA
 
+    def process_col_val(self, col_val):
+        return col_val.tobytes()
+
 class Text(Simple):
     ColumnType = c.Text
 

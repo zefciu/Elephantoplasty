@@ -26,4 +26,7 @@ class OneColumn(Field, metaclass=ABCMeta):
         return super(OneColumn, self).bind_class(cls, name)
 
     def hydrate(self, inst, col_vals, dict_, session):
-        dict_[self.name] = col_vals[self.column.name]
+        dict_[self.name] = self.process_col_val(col_vals[self.column.name])
+
+    def process_col_val(self, col_val):
+        return col_val
